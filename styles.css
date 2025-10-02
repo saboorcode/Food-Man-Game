@@ -1,0 +1,22 @@
+body {
+    background: rgb(209, 209, 209);
+    color: black;
+    text-align: center;
+    margin: 0 auto;
+    padding: 0;
+    max-width: 100vw;
+    max-height: 100vh;
+    overflow: hidden;
+}
+
+#character {
+    background: black;
+    height: 1vh;
+    width: 1vh;
+}
+
+#enemy {
+    background: red;
+    height: 2vh;
+    width: 2vh;
+}
