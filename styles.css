@@ -1,5 +1,5 @@
 body {
-    background: rgb(209, 209, 209);
+    background: rgb(58, 58, 58);
     color: black;
     text-align: center;
     margin: 0 auto;
@@ -10,13 +10,7 @@ body {
 }
 
 #character {
-    background: black;
-    height: 1vh;
-    width: 1vh;
-}
-
-#enemy {
-    background: red;
-    height: 2vh;
-    width: 2vh;
+    height: fit-content;
+    width: fit-content;
+    scale: 1.5;
 }
