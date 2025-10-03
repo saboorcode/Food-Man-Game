@@ -11,9 +11,8 @@ body {
 main {
     margin-top: 3em;
     height: 90vh;
-    border: 5px inset rgb(255, 247, 128);
+    border: 5px inset rgb(141, 171, 226);
     border-radius: 16px;
-    z-index: 10;
 }
 
 #character {
