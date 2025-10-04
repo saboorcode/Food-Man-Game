@@ -6,17 +6,48 @@ body {
     padding: 0 1em;
     max-width: 1420px;
     overflow: hidden;
+    font-size: clamp(12px, 1vw, 1em);
 }
 
 main {
-    margin-top: 3em;
     height: 90vh;
-    border: 5px inset rgb(141, 171, 226);
-    border-radius: 16px;
+    border: 5px inset rgb(235, 255, 57);
 }
 
-#character {
-    height: fit-content;
+#food-man {
     width: fit-content;
-    scale: 1.5;
+    height: auto;
+    scale: 1.3;
+}
+
+.food {
+    position: absolute;
+    width: fit-content;
+    height: auto;
+    scale: 1.3;
+    opacity: 100%;
+    animation: foodSpawn 1s linear forwards;
+}
+
+/* CSS Animation */
+@keyframes foodSpawn {
+    0% {
+        opacity: 100%;
+    }
+
+    25% {
+        opacity: 0%;
+    }
+
+    50% {
+        opacity: 100%;
+    }
+
+    75% {
+        opacity: 0%;
+    }
+
+    to {
+        opacity: 100%;
+    }
 }
