@@ -1,5 +1,5 @@
 body {
-    background: rgb(0, 0, 0);
+    background: rgb(58, 0, 0);
     color: rgb(240, 240, 240);
     text-align: center;
     margin: 0 auto;
@@ -10,6 +10,7 @@ body {
 }
 
 main {
+    background: rgb(156, 0, 0);
     height: 90vh;
     border: 5px inset rgb(235, 255, 57);
 }
@@ -28,11 +29,67 @@ main {
     opacity: 100%;
     animation: foodSpawn 1s linear forwards;
 
-    border: 1px solid white;
+    /*border: 1px solid white;*/
 }
 
 p {
     font-size: 12px;
+}
+
+.mobile-touch-control {
+    width: 150px;
+    height: 150px;
+    
+    position: absolute;
+    right: 0;
+    bottom: 0;
+
+    display: none;
+}
+
+.touch-button {
+    background: rgba(255, 255, 255, 0.719);
+    width: 50px;
+    height: 50px;
+    border-radius: 25%;
+}
+
+.touch-button:active {
+    background: white;
+    color: red;
+}
+
+.touch-up {
+    position: absolute;
+    top: 0;
+    left: 50px;
+}
+
+.touch-right {
+    position: absolute;
+    top: 50px;
+    right: 0;
+}
+
+.touch-down {
+    position: absolute;
+    bottom: 0;
+    left: 50px;
+}
+
+.touch-left {
+    position: absolute;
+    top: 50px;
+    left: 0;
+}
+
+.touch-stop {
+    background: rgba(255, 0, 0, 0.822);
+    width: 40px;
+    height: 40px;
+    position: absolute;
+    top: 55px;
+    left: 55px;
 }
 
 /* CSS Animation */

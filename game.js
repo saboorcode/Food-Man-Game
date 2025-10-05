@@ -16,18 +16,8 @@ function game() {
     let xPosition = gameScreenWidth / 2;
     let yPosition = gameScreenHeight / 2;
 
-    /*
-    / Observe DOM Changes and callback collisionDetection(); /
-    // https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver/observe
-    new MutationObserver(() => {
-        collisionDetection(); // Collision detection - https://developer.mozilla.org/en-US/docs/Games/Tutorials/2D_Breakout_game_pure_JavaScript/Collision_detection
-    }).observe(gameScreen, {
-        subtree: true,
-        childList: true,
-    });
-    */
 
-    sprite(); // Create sprite - spawns it on web page, moves it with player's control using Keyboard Event API
+    sprite(); // Create sprite - spawns it on web page, moves it with player's control using Keyboard Event API and Mobile Touch Control
     foodSpawn(); // Spawn Foods.. (one food spawn at page load and spawns a food every 3-9 seconds)
 
 
@@ -35,12 +25,6 @@ function game() {
         spriteMovementController();
         animateSprite();
         //browserResize();
-        /* functions to be called within */
-        /*
-            moveSprite(direction);
-            boundary(x, y);
-            pauseSprite();
-        */
 
         const character = document.createElement("div");
         character.classList.add("food-man");
@@ -61,7 +45,40 @@ function game() {
 
         let prevKeyPressed = "up";
 
-        function spriteMovementController() { // Listen to WASD and Arrow key presses
+        function spriteMovementController() { // Move Sprite. Listen to WASD, Arrow Key, and Mobile Touch Button Presses.
+            mobileTouchControl(); // Enables Mobile Touch Control
+
+            function mobileTouchControl() {
+                const mobileTouchControlBox = document.querySelector(".mobile-touch-control");
+                const touchButtons = document.querySelectorAll(".touch-button");
+
+                mobileTouchControlBox.style.display = "block";
+
+                for (const touchButtonEl of touchButtons) {
+                    touchButtonEl.addEventListener("click", (event) => {
+                        const touchButtonPressed = event.currentTarget;
+
+                        switch (touchButtonPressed.classList[1]) {
+                            case "touch-up":
+                                controlSpriteMovement("UP");
+                                break;
+                            case "touch-right":
+                                controlSpriteMovement("RIGHT");
+                                break;
+                            case "touch-down":
+                                controlSpriteMovement("DOWN");
+                                break;
+                            case "touch-left":
+                                controlSpriteMovement("LEFT");
+                                break;
+                            case "touch-stop":
+                                controlSpriteMovement("STOP");
+                                break;
+                        }
+                    });
+                }
+            }
+
             document.body.addEventListener("keydown", (keyboardEvent) => {
                 // Using Keyboard Event API (Built-in Browser) => https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent
                 const key = keyboardEvent.key.toUpperCase();
@@ -69,30 +86,30 @@ function game() {
                 switch (key) {
                     case "W":
                     case "ARROWUP":
-                        // Interval is cleared before calling moveSprite(), this ensures an interval runs in a direction rather than multiple simultaneously.
-                        clearInterval(interval);
-                        moveSprite("up"); // Move sprite in a direction "up, left, down, right"
+                        controlSpriteMovement("UP");
                         break;
                     case "A":
                     case "ARROWLEFT":
-                        clearInterval(interval);
-                        moveSprite("left");
+                        controlSpriteMovement("LEFT");
                         break;
                     case "S":
                     case "ARROWDOWN":
-                        clearInterval(interval);
-                        moveSprite("down");
+                        controlSpriteMovement("DOWN");
                         break;
                     case "D":
                     case "ARROWRIGHT":
-                        clearInterval(interval);
-                        moveSprite("right");
+                        controlSpriteMovement("RIGHT");
                         break;
                     case " ": // Space Bar, keyboardEvent API has it as " " for some reason.
-                        pauseSprite();
+                        controlSpriteMovement("STOP");
                         break;
                 }
-            })
+            });
+
+            function controlSpriteMovement(direction) {
+                clearInterval(interval); // Interval is cleared before calling moveSprite(), this ensures an interval runs in a direction rather than multiple simultaneously which causes glitch.
+                moveSprite(direction);
+            }
         }
 
         function animateSprite() {
@@ -110,7 +127,7 @@ function game() {
                 character.style.transform = "rotateY(0deg)";
 
                 switch (direction) {
-                    case "up":
+                    case "UP":
                         // check if current xPos, yPos is within pre-defined boundary
                         // One parameter is adjusted, reversely in a specified direction to prevent sprite being trapped at boundary
                         if (boundary(xPosition, yPosition - incDec)) {
@@ -120,26 +137,29 @@ function game() {
                             character.style.rotate = "-90deg";
                         }
                         break;
-                    case "left":
+                    case "LEFT":
                         if (boundary(xPosition - incDec, yPosition)) {
                             xPosition -= incDec;
                             character.style.translate = `${xPosition}px ${yPosition}px`;
                             character.style.transform = "rotateY(180deg)";
                         }
                         break;
-                    case "down":
+                    case "DOWN":
                         if (boundary(xPosition, yPosition + incDec)) {
                             yPosition += incDec;
                             character.style.translate = `${xPosition}px ${yPosition}px`;
                             character.style.rotate = "90deg";
                         }
                         break;
-                    case "right":
+                    case "RIGHT":
                         if (boundary(xPosition + incDec, yPosition)) {
                             xPosition += incDec;
                             character.style.translate = `${xPosition}px ${yPosition}px`;
                             character.style.rotate = "0deg";
                         }
+                        break;
+                    case "STOP":
+                        clearInterval(interval);
                         break;
                 }
 
@@ -155,10 +175,6 @@ function game() {
                 clearInterval(interval); // Clears interval declared globally, we don't need setInterval() within moveSprite(direction) to run anymore.
                 return false;
             }
-        }
-
-        function pauseSprite() {
-            clearInterval(interval); // Clears interval declared globally, stops sprite's movement
         }
 
         function browserResize() {
@@ -191,14 +207,14 @@ function game() {
             food.style.translate = `${foodPosition[0]}px ${foodPosition[1]}px`;
 
             /* Food Position Display for Troubleshooting */
+            /*
             const pos = document.createElement("p");
             pos.textContent = `(x: ${foodPosition[0]}, y: ${foodPosition[1]})`;
             food.appendChild(pos)
+            */
 
             gameScreen.appendChild(food);
-
         }
-
     }
 
     function collisionDetection() {
@@ -212,14 +228,19 @@ function game() {
         const foods = document.querySelectorAll(".food");
 
         for (const food of foods) {
-            const xPositionFood = food.style.translate.replaceAll("px", "").split(" ").map((x) => parseInt(x))[0] - 10;
-            const yPositionFood = food.style.translate.replaceAll("px", "").split(" ").map((x) => parseInt(x))[1] - 10;
+            /* Access translate value from CSS style rules that was used to repaints on web page 
+               Every food element and extracts it as [x, y] positions
+            */
+            const xPositionFood = food.style.translate.replaceAll("px", "").split(" ").map((x) => parseInt(x))[0];
+            const yPositionFood = food.style.translate.replaceAll("px", "").split(" ").map((x) => parseInt(x))[1];
+            //console.log("Food-Man Position: ", xPosition, yPosition)
 
-
-            if (xPosition > xPositionFood && xPosition < (xPositionFood + 66) && yPosition > yPositionFood && yPosition < (yPositionFood + 80 )) {
+            if (xPosition > xPositionFood - 25 && xPosition < (xPositionFood + 66) && yPosition > yPositionFood - 10 && yPosition < (yPositionFood + 75)) {
+                /*
                 console.log("Food-Man Position: ", xPosition, yPosition)
                 console.log("Food Position", xPositionFood, yPositionFood);
                 console.log("collison detected");
+                */
 
                 // Specific food was detected by collision with food man
                 // DOM API allows us to remove an element (specific food collided with food man) using DOMElement.remove()
