@@ -2,6 +2,7 @@ game();
 
 function game() {
     const gameScreen = document.querySelector("main");
+    gameScreen.replaceChildren();
     // https://developer.mozilla.org/en-US/docs/Web/API/CSS_Object_Model/Determining_the_dimensions_of_elements
     let gameScreenWidth = gameScreen.offsetWidth - 50;
     let gameScreenHeight = gameScreen.offsetHeight - 50;
@@ -10,13 +11,30 @@ function game() {
     const xBoundaries = [0, gameScreenWidth];
     const yBoundaries = [5, gameScreenHeight];
 
+    // https://developer.mozilla.org/en-US/docs/Web/CSS/translate
+    // Default x, y values - centers sprite on screen as start position
+    let xPosition = gameScreenWidth / 2;
+    let yPosition = gameScreenHeight / 2;
+
+    /*
+    / Observe DOM Changes and callback collisionDetection(); /
+    // https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver/observe
+    new MutationObserver(() => {
+        collisionDetection(); // Collision detection - https://developer.mozilla.org/en-US/docs/Games/Tutorials/2D_Breakout_game_pure_JavaScript/Collision_detection
+    }).observe(gameScreen, {
+        subtree: true,
+        childList: true,
+    });
+    */
+
     sprite(); // Create sprite - spawns it on web page, moves it with player's control using Keyboard Event API
-    foodSpawn(); // Spawn Foods..
+    foodSpawn(); // Spawn Foods.. (one food spawn at page load and spawns a food every 3-9 seconds)
+
 
     function sprite() {
         spriteMovementController();
         animateSprite();
-        browserResize();
+        //browserResize();
         /* functions to be called within */
         /*
             moveSprite(direction);
@@ -24,7 +42,8 @@ function game() {
             pauseSprite();
         */
 
-        const character = document.getElementById("food-man");
+        const character = document.createElement("div");
+        character.classList.add("food-man");
         const sprite = document.createElement("img");
 
         const arraySpriteLayers = ["/assets/sprites/sprite_1.png", "/assets/sprites/sprite_2.png"];
@@ -32,14 +51,9 @@ function game() {
 
         character.appendChild(sprite);
 
+        gameScreen.appendChild(character);
+
         let interval;
-
-        // https://developer.mozilla.org/en-US/docs/Web/CSS/translate
-        // Default x, y values - centers sprite on screen as start position
-        let xPosition = gameScreenWidth / 2;
-        let yPosition = gameScreenHeight / 3;
-
-        console.log(gameScreenWidth, gameScreenHeight)
 
         character.style.translate = `${xPosition}px ${yPosition}px`;
 
@@ -51,10 +65,6 @@ function game() {
             document.body.addEventListener("keydown", (keyboardEvent) => {
                 // Using Keyboard Event API (Built-in Browser) => https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent
                 const key = keyboardEvent.key.toUpperCase();
-
-                // Resets sprite rotation
-                character.style.rotate = "0deg";
-                character.style.transform = "rotateY(0deg)";
 
                 switch (key) {
                     case "W":
@@ -95,6 +105,10 @@ function game() {
             interval = setInterval(() => { // setInterval() ensures Sprite keeps moving every 100ms with a condition (direction)
                 //console.log(xPosition, yPosition);
 
+                // Resets sprite rotation
+                character.style.rotate = "0deg";
+                character.style.transform = "rotateY(0deg)";
+
                 switch (direction) {
                     case "up":
                         // check if current xPos, yPos is within pre-defined boundary
@@ -128,6 +142,8 @@ function game() {
                         }
                         break;
                 }
+
+                collisionDetection();
             }, 25);
         }
 
@@ -149,10 +165,9 @@ function game() {
             // Ensures sprite is inside game screen, in case player resize browser during the game.
             // I caught sprite moving outside the browser window, I implemented "browserResize()" as error catch handler
             window.addEventListener("resize", (event) => {
-                gameScreenWidth = document.querySelector("main").offsetWidth;
-                gameScreenHeight = document.querySelector("main").offsetHeight;
+                game();
 
-                character.style.translate = `${gameScreenWidth / 2}px ${gameScreenHeight / 3}px`;
+                //character.style.translate = `${gameScreenWidth / 2}px ${gameScreenHeight / 3}px`;
             });
         }
     }
@@ -160,10 +175,11 @@ function game() {
     function foodSpawn() {
         spawnGeneratedFood(); // Spawn first food
 
-        // Spawn food at a time for every 1-5 seconds throughout the game
-        const foodSpawnInterval = setInterval(() => { spawnGeneratedFood() }, (Math.floor(Math.random() * 5000)));
+        // Spawn food at a time for every 3-0 second(s) throughout the game
+        const foodSpawnInterval = setInterval(() => { spawnGeneratedFood(); }, (2000 * Math.ceil(Math.random() * 3)));
 
         function spawnGeneratedFood() {
+            const foodPosition = [Math.floor(Math.random() * gameScreenWidth), Math.floor(Math.random() * gameScreenHeight - 25)];
             const food = document.createElement("div");
             food.classList.add("food");
 
@@ -172,12 +188,44 @@ function game() {
 
             food.appendChild(foodImg);
 
-            food.style.translate = `${Math.floor(Math.random() * gameScreenWidth)}px ${Math.floor(Math.random() * gameScreenHeight - 25)}px`;
+            food.style.translate = `${foodPosition[0]}px ${foodPosition[1]}px`;
+
+            /* Food Position Display for Troubleshooting */
+            const pos = document.createElement("p");
+            pos.textContent = `(x: ${foodPosition[0]}, y: ${foodPosition[1]})`;
+            food.appendChild(pos)
 
             gameScreen.appendChild(food);
+
         }
 
+    }
 
+    function collisionDetection() {
+        // https://developer.mozilla.org/en-US/docs/Games/Tutorials/2D_Breakout_game_pure_JavaScript/Collision_detection
+        /*
+            The x position of the food-man is greater than the x position of the food.
+            The x position of the food-man is less than the x position of the food plus its width.
+            The y position of the food-man is greater than the y position of the food.
+            The y position of the food-man is less than the y position of the food plus its height.
+        */
+        const foods = document.querySelectorAll(".food");
+
+        for (const food of foods) {
+            const xPositionFood = food.style.translate.replaceAll("px", "").split(" ").map((x) => parseInt(x))[0] - 10;
+            const yPositionFood = food.style.translate.replaceAll("px", "").split(" ").map((x) => parseInt(x))[1] - 10;
+
+
+            if (xPosition > xPositionFood && xPosition < (xPositionFood + 66) && yPosition > yPositionFood && yPosition < (yPositionFood + 80 )) {
+                console.log("Food-Man Position: ", xPosition, yPosition)
+                console.log("Food Position", xPositionFood, yPositionFood);
+                console.log("collison detected");
+
+                // Specific food was detected by collision with food man
+                // DOM API allows us to remove an element (specific food collided with food man) using DOMElement.remove()
+                food.remove();
+            }
+        }
 
     }
 }
