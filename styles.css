@@ -5,13 +5,12 @@ body {
     margin: 0 auto;
     padding: 0 1em;
     max-width: 1420px;
-    overflow: hidden;
     font-size: clamp(12px, 1vw, 1em);
 }
 
 main {
     background: rgb(156, 0, 0);
-    height: 90vh;
+    height: 85vh;
     border: 5px inset rgb(235, 255, 57);
 }
 
