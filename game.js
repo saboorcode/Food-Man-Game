@@ -129,7 +129,7 @@ function game() {
                 switch (direction) {
                     case "UP":
                         // check if current xPos, yPos is within pre-defined boundary
-                        // One parameter is adjusted, reversely in a specified direction to prevent sprite being trapped at boundary
+                        // One parameter is adjusted, reversely in a specified direction to prevent foodman being trapped at boundary
                         if (boundary(xPosition, yPosition - incDec)) {
                             // Increase/decrease x, y position and positions sprite accordingly using CSS
                             yPosition -= incDec;
@@ -235,7 +235,8 @@ function game() {
             const yPositionFood = food.style.translate.replaceAll("px", "").split(" ").map((x) => parseInt(x))[1];
             //console.log("Food-Man Position: ", xPosition, yPosition)
 
-            if (xPosition > xPositionFood - 25 && xPosition < (xPositionFood + 66) && yPosition > yPositionFood - 10 && yPosition < (yPositionFood + 75)) {
+            // Detect and remove food collided with food man using collision detection algorithm
+            if (xPosition > xPositionFood - 40 && xPosition < (xPositionFood + 40) && yPosition > yPositionFood - 10 && yPosition < (yPositionFood + 75)) {
                 /*
                 console.log("Food-Man Position: ", xPosition, yPosition)
                 console.log("Food Position", xPositionFood, yPositionFood);
