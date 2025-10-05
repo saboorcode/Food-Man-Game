@@ -1,4 +1,4 @@
-game();
+game(); // Start game | Hungry Food Man Game
 
 function game() {
     const gameScreen = document.querySelector("main");
@@ -8,7 +8,7 @@ function game() {
     let gameScreenHeight = gameScreen.offsetHeight - 50;
 
     // Pre-defined boundary
-    const xBoundaries = [0, gameScreenWidth];
+    const xBoundaries = [5, gameScreenWidth];
     const yBoundaries = [5, gameScreenHeight];
 
     // https://developer.mozilla.org/en-US/docs/Web/CSS/translate
@@ -16,10 +16,12 @@ function game() {
     let xPosition = gameScreenWidth / 2;
     let yPosition = gameScreenHeight / 2;
 
+    let foodsEatenCount = -1;
 
+    /* Hoisted Function Calls */
     sprite(); // Create sprite - spawns it on web page, moves it with player's control using Keyboard Event API and Mobile Touch Control
     foodSpawn(); // Spawn Foods.. (one food spawn at page load and spawns a food every 3-9 seconds)
-
+    scoreBoard();
 
     function sprite() {
         spriteMovementController();
@@ -113,7 +115,7 @@ function game() {
         }
 
         function animateSprite() {
-            setInterval(() => { // Switches sprite layer every 150ms (.15 seconds)
+            setInterval(() => { // Switches sprite layer every 150ms (.15 seconds) | 1000ms = 1 second
                 sprite.src = sprite.src.includes(arraySpriteLayers[0]) ? arraySpriteLayers[1] : arraySpriteLayers[0];
             }, 150);
         }
@@ -191,7 +193,7 @@ function game() {
     function foodSpawn() {
         spawnGeneratedFood(); // Spawn first food
 
-        // Spawn food at a time for every 3-0 second(s) throughout the game
+        // Spawn food every 2-6 second(s) throughout the game
         const foodSpawnInterval = setInterval(() => { spawnGeneratedFood(); }, (2000 * Math.ceil(Math.random() * 3)));
 
         function spawnGeneratedFood() {
@@ -246,8 +248,28 @@ function game() {
                 // Specific food was detected by collision with food man
                 // DOM API allows us to remove an element (specific food collided with food man) using DOMElement.remove()
                 food.remove();
+
+                foodsEatenCounter();
             }
         }
 
+    }
+
+    function scoreBoard() { /* Score Board Generator */
+        const scoreBoardHeader = document.createElement("div");
+        scoreBoardHeader.classList.add("score-board");
+        const totalScore = document.createElement("h1");
+        totalScore.classList.add("total-score");
+        scoreBoardHeader.appendChild(totalScore);
+        gameScreen.appendChild(scoreBoardHeader);
+
+        foodsEatenCounter(); // Initial score of 0.
+    }
+
+    function foodsEatenCounter() { // Increase "Foods Eaten" Score by 1 on the Score Board
+        // I wish I could place this and call this function inside scoreBoard() but it wouldn't be accessible outside (like inside collisionDetection()) due to scope
+        foodsEatenCount += 1;
+
+        document.querySelector(".total-score").textContent = `Foods Eaten: ${foodsEatenCount}`;
     }
 }

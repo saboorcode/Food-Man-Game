@@ -9,6 +9,7 @@ body {
 }
 
 main {
+    position: relative;
     background: rgb(156, 0, 0);
     height: 85vh;
     border: 5px inset rgb(235, 255, 57);
@@ -33,6 +34,18 @@ main {
 
 p {
     font-size: 12px;
+}
+
+.score-board {
+    position: absolute;
+    top: 0;
+    right: 0;
+    padding: 1em;
+}
+
+.score-board > * { /* Combinator, applies to all children elements */
+    font-size: clamp(1.5em, 1vw ,2em);
+    margin: 0;
 }
 
 .mobile-touch-control {
