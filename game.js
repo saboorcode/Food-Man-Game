@@ -26,9 +26,6 @@ function game() {
     foodSpawn(); // Spawn Foods.. (one food spawn at page load and spawns a food every 3-9 seconds)
     scoreBoard();
     grandmaSprite();
-    setInterval(() => {
-        collisionDetection();
-    }, 25);
 
     function sprite() {
         spriteMovementController();
@@ -65,6 +62,8 @@ function game() {
                     touchButtonEl.addEventListener("click", (event) => {
                         const touchButtonPressed = event.currentTarget;
 
+                        console.log("Touch Button Pressed:", touchButtonPressed.classList[1].toUpperCase());
+
                         switch (touchButtonPressed.classList[1]) {
                             case "touch-up":
                                 controlSpriteMovement("UP");
@@ -89,6 +88,8 @@ function game() {
             document.body.addEventListener("keydown", (keyboardEvent) => {
                 // Using Keyboard Event API (Built-in Browser) => https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent
                 const key = keyboardEvent.key.toUpperCase();
+
+                console.log("KEY PRESSED:", key);
 
                 switch (key) {
                     case "W":
@@ -125,13 +126,6 @@ function game() {
             }, 150);
         }
 
-        const pos1 = document.createElement("ul");
-        pos1.innerHTML = `<li>x: ${xPosition}px</li> <li> y: ${yPosition}px</li>`;
-        pos1.style.margin = "0";
-        pos1.style.translate = `${xPosition-685}px ${yPosition+50}px`;
-        pos1.style.fontSize = "16px";
-        gameScreen.appendChild(pos1);
-
         function moveSprite(direction) {
             interval = setInterval(() => { // setInterval() ensures Sprite keeps moving every 100ms with a condition (direction)
                 //console.log(xPosition, yPosition);
@@ -139,9 +133,6 @@ function game() {
                 // Resets sprite rotation
                 character.style.rotate = "0deg";
                 character.style.transform = "rotateY(0deg)";
-
-                pos1.innerHTML = `<li>x: ${xPosition}px</li> <li> y: ${yPosition}px</li>`;
-                pos1.style.translate = `${xPosition-685}px ${yPosition+50}px`;
 
                 switch (direction) {
                     case "UP":
@@ -179,6 +170,8 @@ function game() {
                         clearInterval(interval);
                         break;
                 }
+
+                collisionDetection();
             }, 25);
         }
 
@@ -253,16 +246,13 @@ function game() {
 
             // Detect and remove food collided with food man using collision detection algorithm
             if (xPosition > xPositionObjectCollided - 30 && xPosition < (xPositionObjectCollided + 55) && yPosition > yPositionObjectCollided - 43 && yPosition < (yPositionObjectCollided + 36)) {
-                /*
-                console.log("Food-Man Position: ", xPosition, yPosition)
-                console.log("Food Position", xPositionObjectCollided, yPositionObjectCollided);
-                console.log("collison detected");
-                */
+                console.log("COLLISION DETECTED");
+                console.log(`Food-Man Position: ${xPosition}px ${yPosition}px`)
+                console.log(`Collision Object Position: ${xPositionObjectCollided}px ${yPositionObjectCollided}px`);
+                console.log("");
 
                 // Specific food or GRANDMA was detected by collision with food man
                 // DOM API allows us to remove an element (specific food collided with food man) using DOMElement.remove()
-                console.log(collisionObject.classList.value.includes("grandma"))
-
                 if (collisionObject.classList.value.includes("grandma")) { // Grandma caught up to Food Man
                     collisionObject.remove();
                     const result = scoreBoard();
@@ -337,12 +327,14 @@ function game() {
             if (grandmaImg.src.includes(grandmaSpriteLayers.sleepOne)) {
                 grandmaImg.src = grandmaSpriteLayers.sleepTwo;
             } else {
+                console.log("Grandma is sleeping...")
                 grandmaImg.src = grandmaSpriteLayers.sleepOne;
             }
 
             if (foodsEatenCount >= 1) {
                 clearInterval(sleepingGrandmaInterval);
                 grandmaImg.src = grandmaSpriteLayers.awake;
+                console.log("Grandma is AWAKE...")
 
                 setTimeout(() => {
                     grandmaChase();
