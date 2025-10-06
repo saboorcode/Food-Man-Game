@@ -16,12 +16,19 @@ function game() {
     let xPosition = gameScreenWidth / 2;
     let yPosition = gameScreenHeight / 2;
 
+    const incDec = 5; // Increase/decrease speed in a direction | sprite movement
+
     let foodsEatenCount = -1;
+    let gameClock = 0;
 
     /* Hoisted Function Calls */
-    sprite(); // Create sprite - spawns it on web page, moves it with player's control using Keyboard Event API and Mobile Touch Control
+    sprite(); // Create Food Man sprite - spawns it on web page, moves it with player's control using Keyboard Event API and Mobile Touch Control
     foodSpawn(); // Spawn Foods.. (one food spawn at page load and spawns a food every 3-9 seconds)
     scoreBoard();
+    grandmaSprite();
+    setInterval(() => {
+        collisionDetection();
+    }, 25);
 
     function sprite() {
         spriteMovementController();
@@ -42,8 +49,6 @@ function game() {
         let interval;
 
         character.style.translate = `${xPosition}px ${yPosition}px`;
-
-        const incDec = 5;
 
         let prevKeyPressed = "up";
 
@@ -120,6 +125,13 @@ function game() {
             }, 150);
         }
 
+        const pos1 = document.createElement("ul");
+        pos1.innerHTML = `<li>x: ${xPosition}px</li> <li> y: ${yPosition}px</li>`;
+        pos1.style.margin = "0";
+        pos1.style.translate = `${xPosition-685}px ${yPosition+50}px`;
+        pos1.style.fontSize = "16px";
+        gameScreen.appendChild(pos1);
+
         function moveSprite(direction) {
             interval = setInterval(() => { // setInterval() ensures Sprite keeps moving every 100ms with a condition (direction)
                 //console.log(xPosition, yPosition);
@@ -127,6 +139,9 @@ function game() {
                 // Resets sprite rotation
                 character.style.rotate = "0deg";
                 character.style.transform = "rotateY(0deg)";
+
+                pos1.innerHTML = `<li>x: ${xPosition}px</li> <li> y: ${yPosition}px</li>`;
+                pos1.style.translate = `${xPosition-685}px ${yPosition+50}px`;
 
                 switch (direction) {
                     case "UP":
@@ -164,8 +179,6 @@ function game() {
                         clearInterval(interval);
                         break;
                 }
-
-                collisionDetection();
             }, 25);
         }
 
@@ -197,9 +210,9 @@ function game() {
         const foodSpawnInterval = setInterval(() => { spawnGeneratedFood(); }, (2000 * Math.ceil(Math.random() * 3)));
 
         function spawnGeneratedFood() {
-            const foodPosition = [Math.floor(Math.random() * gameScreenWidth), Math.floor(Math.random() * gameScreenHeight - 25)];
+            const foodPosition = [Math.floor(Math.random() * gameScreenWidth), Math.floor(Math.random() * gameScreenHeight)];
             const food = document.createElement("div");
-            food.classList.add("food");
+            food.classList.add("food", "collision-object");
 
             const foodImg = document.createElement("img");
             foodImg.src = `/assets/sprites/food/food${Math.ceil(Math.random() * 7)}.png`;
@@ -208,12 +221,13 @@ function game() {
 
             food.style.translate = `${foodPosition[0]}px ${foodPosition[1]}px`;
 
-            /* Food Position Display for Troubleshooting */
-            /*
+            /* Position Display for Troubleshooting */
             const pos = document.createElement("p");
             pos.textContent = `(x: ${foodPosition[0]}, y: ${foodPosition[1]})`;
+            pos.style.margin = "0";
+            foodImg.style.border = "2px solid white";
             food.appendChild(pos)
-            */
+            /* Position Display for Troubleshooting */
 
             gameScreen.appendChild(food);
         }
@@ -227,43 +241,65 @@ function game() {
             The y position of the food-man is greater than the y position of the food.
             The y position of the food-man is less than the y position of the food plus its height.
         */
-        const foods = document.querySelectorAll(".food");
+        const collisionObjects = document.querySelectorAll(".collision-object");
 
-        for (const food of foods) {
+        for (const collisionObject of collisionObjects) {
             /* Access translate value from CSS style rules that was used to repaints on web page 
                Every food element and extracts it as [x, y] positions
             */
-            const xPositionFood = food.style.translate.replaceAll("px", "").split(" ").map((x) => parseInt(x))[0];
-            const yPositionFood = food.style.translate.replaceAll("px", "").split(" ").map((x) => parseInt(x))[1];
+            const xPositionObjectCollided = collisionObject.style.translate.replaceAll("px", "").split(" ").map((x) => parseInt(x))[0];
+            const yPositionObjectCollided = collisionObject.style.translate.replaceAll("px", "").split(" ").map((x) => parseInt(x))[1];
             //console.log("Food-Man Position: ", xPosition, yPosition)
 
             // Detect and remove food collided with food man using collision detection algorithm
-            if (xPosition > xPositionFood - 40 && xPosition < (xPositionFood + 40) && yPosition > yPositionFood - 10 && yPosition < (yPositionFood + 75)) {
+            if (xPosition > xPositionObjectCollided - 30 && xPosition < (xPositionObjectCollided + 55) && yPosition > yPositionObjectCollided - 43 && yPosition < (yPositionObjectCollided + 36)) {
                 /*
                 console.log("Food-Man Position: ", xPosition, yPosition)
-                console.log("Food Position", xPositionFood, yPositionFood);
+                console.log("Food Position", xPositionObjectCollided, yPositionObjectCollided);
                 console.log("collison detected");
                 */
 
-                // Specific food was detected by collision with food man
+                // Specific food or GRANDMA was detected by collision with food man
                 // DOM API allows us to remove an element (specific food collided with food man) using DOMElement.remove()
-                food.remove();
+                console.log(collisionObject.classList.value.includes("grandma"))
 
-                foodsEatenCounter();
+                if (collisionObject.classList.value.includes("grandma")) { // Grandma caught up to Food Man
+                    collisionObject.remove();
+                    const result = scoreBoard();
+
+                    alert(`Grandma catched you! Game Over!\nTime Played: ${result[0]} seconds\nFoods Eaten: ${result[1]}`);
+                } else { // Remove specific food that collided with Food Man
+                    collisionObject.remove();
+                    foodsEatenCounter();
+                }
             }
         }
 
     }
 
     function scoreBoard() { /* Score Board Generator */
-        const scoreBoardHeader = document.createElement("div");
-        scoreBoardHeader.classList.add("score-board");
-        const totalScore = document.createElement("h1");
+        const scoreBoard = document.createElement("div");
+        scoreBoard.classList.add("score-board");
+        const totalScore = document.createElement("p");
         totalScore.classList.add("total-score");
-        scoreBoardHeader.appendChild(totalScore);
-        gameScreen.appendChild(scoreBoardHeader);
+
+        const timer = document.createElement("p");
+        timer.classList.add("timer");
+        timer.textContent = `Time played: ${gameClock}s`;
+
+        scoreBoard.appendChild(timer);
+        scoreBoard.appendChild(totalScore);
+        gameScreen.appendChild(scoreBoard);
+
+        setInterval(() => {
+            gameClock += 1;
+
+            timer.textContent = `Time played: ${gameClock}s`;
+        }, 1000);
 
         foodsEatenCounter(); // Initial score of 0.
+
+        return [gameClock, foodsEatenCount];
     }
 
     function foodsEatenCounter() { // Increase "Foods Eaten" Score by 1 on the Score Board
@@ -271,5 +307,92 @@ function game() {
         foodsEatenCount += 1;
 
         document.querySelector(".total-score").textContent = `Foods Eaten: ${foodsEatenCount}`;
+    }
+
+    function grandmaSprite() {
+        const grandmaSpriteLayers = {
+            sleepOne: "/assets/sprites/grandma/grandma_1.png",
+            sleepTwo: "/assets/sprites/grandma/grandma_2.png",
+            awake: "/assets/sprites/grandma/grandma_3.png",
+            chasing: "/assets/sprites/grandma/grandma_4.png",
+            angry: "/assets/sprites/grandma/grandma_5.png"
+        }
+
+        const grandma = document.createElement("div");
+        grandma.classList.add("grandma", "collision-object");
+        const grandmaImg = document.createElement("img");
+        grandmaImg.src = grandmaSpriteLayers.sleepOne;
+        grandma.style.translate = "15px 15px";
+
+        grandma.appendChild(grandmaImg);
+
+        gameScreen.appendChild(grandma);
+
+        const pos = document.createElement("ul");
+        pos.innerHTML = `<li>x: ${15}px</li> <li> y: ${15}px</li>`;
+        pos.style.margin = "0";
+        grandma.appendChild(pos);
+
+        const sleepingGrandmaInterval = setInterval(() => { // Animate Sleeping GrandMa at Page load for 3 seconds
+            if (grandmaImg.src.includes(grandmaSpriteLayers.sleepOne)) {
+                grandmaImg.src = grandmaSpriteLayers.sleepTwo;
+            } else {
+                grandmaImg.src = grandmaSpriteLayers.sleepOne;
+            }
+
+            if (foodsEatenCount >= 1) {
+                clearInterval(sleepingGrandmaInterval);
+                grandmaImg.src = grandmaSpriteLayers.awake;
+
+                setTimeout(() => {
+                    grandmaChase();
+                }, 2000);
+            }
+        }, 300);
+
+        function grandmaChase() {
+            console.log("Grandma is now chasing");
+            grandmaImg.src = grandmaSpriteLayers.chasing;
+
+            let grandmaXPosition = grandma.style.translate.replaceAll("px", "").split(" ").map((x) => parseInt(x))[0];
+            let grandmaYPosition = grandma.style.translate.replaceAll("px", "").split(" ").map((x) => parseInt(x))[1];
+            let grandmaSpeed = incDec * .3; // Half of food man's speed because she's a grandma right?
+
+            setInterval(() => {
+                // Recalculate food man's position and have grandma chase accordingly
+                //if (grandmaXPosition !== xPosition) {
+                if (grandmaXPosition < xPosition) {
+                    grandmaXPosition += grandmaSpeed;
+                }
+
+                if (grandmaXPosition > xPosition) {
+                    grandmaXPosition -= grandmaSpeed;
+                }
+                //} else if (grandmaYPosition !== yPosition) {
+                if (grandmaYPosition < yPosition) {
+                    grandmaYPosition += grandmaSpeed;
+                }
+
+                if (grandmaYPosition > yPosition) {
+                    grandmaYPosition -= grandmaSpeed;
+                }
+                //}
+
+
+                pos.innerHTML = `<li>x: ${Math.ceil(grandmaXPosition)}px</li> <li> y: ${Math.ceil(grandmaYPosition)}px</li>`;
+
+                grandma.style.translate = `${grandmaXPosition}px ${grandmaYPosition}px`;
+            }, 25);
+
+            setInterval(() => {
+                if (grandmaImg.src.includes(grandmaSpriteLayers.chasing)) {
+                    grandmaImg.src = grandmaSpriteLayers.angry;
+                    grandmaSpeed = incDec * .6;
+                } else {
+                    grandmaImg.src = grandmaSpriteLayers.chasing;
+                    grandmaSpeed = incDec * .3;
+                }
+            }, 5000);
+        }
     }
 }
