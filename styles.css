@@ -42,10 +42,6 @@ ul, p {
     z-index: 2;
 }
 
-.grandma img {
-    border: 3px solid red;
-}
-
 .food {
     position: absolute;
     width: fit-content;
@@ -54,8 +50,6 @@ ul, p {
     opacity: 100%;
     animation: foodSpawn 1s linear forwards;
     z-index: 1;
-
-    /*border: 1px solid white;*/
 }
 
 .score-board {
