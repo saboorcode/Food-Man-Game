@@ -2,7 +2,7 @@ game(); // Start game | Hungry Food Man Game
 
 function game() {
     const gameScreen = document.querySelector("main");
-    gameScreen.replaceChildren();
+    gameScreen.replaceChildren(); // Clears out everything on game screen like food spawns just in case for a Game Restart, game() return statement is already provided to exits early.
 
     // https://developer.mozilla.org/en-US/docs/Web/API/CSS_Object_Model/Determining_the_dimensions_of_elements
     let gameScreenWidth = gameScreen.offsetWidth - 50;
@@ -24,19 +24,23 @@ function game() {
 
     let direction;
 
-    let foodManSpriteAnimationReq;
+    let foodsSpawnedCount = 0;
+
+    window.addEventListener("resize", () => {
+        direction = "STOP"
+    });
 
     /* Hoisted Function Calls */
     sprite(); // Create Food Man sprite - spawns it on web page, moves it with player's control using Keyboard Event API and Mobile Touch Control
     foodSpawn(); // Spawn Foods.. (one food spawn at page load and spawns a food every 3-9 seconds)
     scoreBoard();
     grandmaSprite();
-    requestAnimationFrame(collisionDetection);
+    requestAnimationFrame(collisionDetection); // Collision-detection continous check with collision objects (foods or grandma) per animation frame.
 
     function sprite() {
         spriteMovementController();
         animateSprite();
-        //browserResize();
+        requestAnimationFrame(moveSprite);
 
         const character = document.createElement("div");
         character.classList.add("food-man");
@@ -49,11 +53,11 @@ function game() {
 
         gameScreen.appendChild(character);
 
-        let interval;
 
         character.style.translate = `${xPosition}px ${yPosition}px`;
 
-        let prevKeyPressed = "up";
+
+
 
         // Move Sprite. Listen to WASD, Arrow Key, and Mobile Touch Button Presses.
         function spriteMovementController() {
@@ -71,19 +75,19 @@ function game() {
 
                         switch (touchButtonPressed.classList[1]) {
                             case "touch-up":
-                                controlSpriteMovement("UP");
+                                direction = "UP";
                                 break;
                             case "touch-right":
-                                controlSpriteMovement("RIGHT");
+                                direction = "RIGHT";
                                 break;
                             case "touch-down":
-                                controlSpriteMovement("DOWN");
+                                direction = "DOWN";
                                 break;
                             case "touch-left":
-                                controlSpriteMovement("LEFT");
+                                direction = "LEFT";
                                 break;
                             case "touch-stop":
-                                controlSpriteMovement("STOP");
+                                direction = "STOP";
                                 break;
                         }
                     });
@@ -98,26 +102,21 @@ function game() {
                     case "W":
                     case "ARROWUP":
                         direction = "UP";
-                        foodManSpriteAnimationReq = requestAnimationFrame(moveSprite);
                         break;
                     case "A":
                     case "ARROWLEFT":
                         direction = "LEFT";
-                        foodManSpriteAnimationReq = requestAnimationFrame(moveSprite);
                         break;
                     case "S":
                     case "ARROWDOWN":
                         direction = "DOWN";
-                        foodManSpriteAnimationReq = requestAnimationFrame(moveSprite);
                         break;
                     case "D":
                     case "ARROWRIGHT":
                         direction = "RIGHT";
-                        foodManSpriteAnimationReq = requestAnimationFrame(moveSprite);
                         break;
                     case " ": // Space Bar, keyboardEvent API has it as " " for some reason.
                         direction = "STOP";
-                        foodManSpriteAnimationReq = requestAnimationFrame(moveSprite);
                         break;
                 }
             });
@@ -168,15 +167,11 @@ function game() {
                     }
                     break;
                 case "STOP":
-                    clearInterval(interval);
+                    // do nothing
                     break;
             }
 
-            //collisionDetection();
-
-            cancelAnimationFrame(foodManSpriteAnimationReq);
             requestAnimationFrame(moveSprite);
-            //}, 25);
         }
 
         function boundary(x, y) {
@@ -194,7 +189,11 @@ function game() {
         spawnGeneratedFood(); // Spawn first food
 
         // Spawn food every 2-6 second(s) throughout the game
-        const foodSpawnInterval = setInterval(() => { spawnGeneratedFood(); }, (2000 * Math.ceil(Math.random() * 3)));
+        const foodSpawnInterval = setInterval(() => {
+            if (foodsSpawnedCount < 11) { // Foods spawn is capped at 10 to prevent infinite spawning, I had 50+ at some point.
+                spawnGeneratedFood();
+            }
+        }, (2000 * Math.ceil(Math.random() * 3)));
 
         function spawnGeneratedFood() {
             const foodPosition = [Math.floor(Math.random() * gameScreenWidth), Math.floor(Math.random() * gameScreenHeight)];
@@ -209,6 +208,8 @@ function game() {
             food.style.translate = `${foodPosition[0]}px ${foodPosition[1]}px`;
 
             gameScreen.appendChild(food);
+
+            foodsSpawnedCount += 1;
         }
     }
 
@@ -236,9 +237,10 @@ function game() {
                 if (collisionObject.classList.value.includes("grandma")) { // Grandma caught up to Food Man
                     collisionObject.remove();
                     const result = scoreBoard();
-
                     alert(`Grandma catched you! Game Over!\nTime Played: ${result[0]} seconds\nFoods Eaten: ${result[1]}`);
-                } else { // Remove specific food that collided with Food Man
+
+                    game();
+                } else if (collisionObject.classList.value.includes("food")) { // Remove specific food that collided with Food Man
                     collisionObject.remove();
                     foodsEatenCounter();
                 }
@@ -274,8 +276,8 @@ function game() {
     }
 
     function foodsEatenCounter() { // Increase "Foods Eaten" Score by 1 on the Score Board
-        // I wish I could place this and call this function inside scoreBoard() but it wouldn't be accessible outside (like inside collisionDetection()) due to scope
         foodsEatenCount += 1;
+        foodsSpawnedCount -= 1;
 
         document.querySelector(".total-score").textContent = `Foods Eaten: ${foodsEatenCount}`;
     }
