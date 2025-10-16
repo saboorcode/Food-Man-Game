@@ -17,7 +17,7 @@ function game() {
     let xPosition = gameScreenWidth / 2;
     let yPosition = gameScreenHeight / 2;
 
-    const speed = 3; // Speed increase/decrease in a direction | Sprite movement speed
+    const speed = 3; // Sprite movement speed
 
     let foodsEatenCount = -1;
     let gameClock = 0;
@@ -26,16 +26,13 @@ function game() {
 
     let foodsSpawnedCount = 0;
 
-    window.addEventListener("resize", () => {
-        direction = "STOP"
-    });
 
     /* Hoisted Function Calls */
     sprite(); // Create Food Man sprite - spawns it on web page, moves it with player's control using Keyboard Event API and Mobile Touch Control
     foodSpawn(); // Spawn Foods.. (one food spawn at page load and spawns a food every 3-9 seconds)
     scoreBoard();
     grandmaSprite();
-    requestAnimationFrame(collisionDetection); // Collision-detection continous check with collision objects (foods or grandma) per animation frame.
+    requestAnimationFrame(collisionDetection); // Collision-detection, continous check with collision objects (foods or grandma) per animation frame.
 
     function sprite() {
         spriteMovementController();
@@ -69,6 +66,7 @@ function game() {
 
                 mobileTouchControlBox.style.display = "block";
 
+                // Mouse left clicks, Mobile Touches Listening
                 for (const touchButtonEl of touchButtons) {
                     touchButtonEl.addEventListener("click", (event) => {
                         const touchButtonPressed = event.currentTarget;
@@ -94,6 +92,7 @@ function game() {
                 }
             }
 
+            // Key Presses Listening | WASD and Arrows
             document.body.addEventListener("keydown", (keyboardEvent) => {
                 // Using Keyboard Event API (Built-in Browser) => https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent
                 const key = keyboardEvent.key.toUpperCase();
@@ -206,7 +205,6 @@ function game() {
             food.appendChild(foodImg);
 
             food.style.translate = `${foodPosition[0]}px ${foodPosition[1]}px`;
-
             gameScreen.appendChild(food);
 
             foodsSpawnedCount += 1;
@@ -227,20 +225,27 @@ function game() {
             /* Access translate value from CSS style rules that was used to repaints on web page 
                Every food element and extracts it as [x, y] positions
             */
-            const xPositionObjectCollided = collisionObject.style.translate.replaceAll("px", "").split(" ").map((x) => parseInt(x))[0];
-            const yPositionObjectCollided = collisionObject.style.translate.replaceAll("px", "").split(" ").map((x) => parseInt(x))[1];
+            const xPositionFoodMan = xPosition + 20; // Readjusted x position of food man so it's equal to x position of object items like foods.
+            const yPositionFoodMan = yPosition + 35;
+            const xPositionObjectItem = collisionObject.style.translate.replaceAll("px", "").split(" ").map((x) => parseInt(x))[0];
+            const yPositionObjectItem = collisionObject.style.translate.replaceAll("px", "").split(" ").map((x) => parseInt(x))[1];
 
-            // Detect and remove food collided with food man using collision detection algorithm
-            if (xPosition > xPositionObjectCollided - 30 && xPosition < (xPositionObjectCollided + 55) && yPosition > yPositionObjectCollided - 43 && yPosition < (yPositionObjectCollided + 36)) {
-                // Specific food or GRANDMA was detected by collision with food man
-                // DOM API allows us to remove an element (specific food collided with food man) using DOMElement.remove()
-                if (collisionObject.classList.value.includes("grandma")) { // Grandma caught up to Food Man
+            if (collisionObject.classList.value.includes("grandma")) { // Grandma caught up to Food Man
+                if (xPositionFoodMan > (xPositionObjectItem - 16) && xPositionFoodMan < (xPositionObjectItem + 57) && yPositionFoodMan > yPositionObjectItem && yPositionFoodMan < (yPositionObjectItem + 72)) {
+                    // Specific food collided with food man
+                    // DOM API allows us to remove an element (specific food collided with food man) using DOMElement.remove()
+                    
                     collisionObject.remove();
                     const result = scoreBoard();
                     alert(`Grandma catched you! Game Over!\nTime Played: ${result[0]} seconds\nFoods Eaten: ${result[1]}`);
-
-                    game();
-                } else if (collisionObject.classList.value.includes("food")) { // Remove specific food that collided with Food Man
+                    
+                    window.location.reload(); // Game Restart
+                }
+            } else if (collisionObject.classList.value.includes("food")) { // Remove specific food that collided with Food Man
+                // Detect and remove food collided with food man using collision detection algorithm
+                if (xPositionFoodMan + 15 > xPositionObjectItem && xPositionFoodMan + 15 < xPositionObjectItem + 67 && yPositionFoodMan > yPositionObjectItem && yPositionFoodMan < yPositionObjectItem + 68) {
+                    // Specific food collided with food man
+                    // DOM API allows us to remove an element (specific food collided with food man) using DOMElement.remove()
                     collisionObject.remove();
                     foodsEatenCounter();
                 }
@@ -301,7 +306,7 @@ function game() {
 
         gameScreen.appendChild(grandma);
 
-        const sleepingGrandmaInterval = setInterval(() => { // Animate Sleeping GrandMa at Page load for 3 seconds
+        const sleepingGrandmaInterval = setInterval(() => { // Animate Sleeping GrandMa at Page load
             if (grandmaImg.src.includes(grandmaSpriteLayers.sleepOne)) {
                 grandmaImg.src = grandmaSpriteLayers.sleepTwo;
             } else {
