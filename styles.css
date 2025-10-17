@@ -131,6 +131,29 @@ img {
     left: 55px;
 }
 
+/* Starvation Bar */
+.starvation-bar-div {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 5px;
+    align-items: center;
+    margin-top: 5px;
+    max-width: 100%;
+
+}
+
+.starvation-bar-div p {
+    margin: 0;
+    font-size: clamp(1em, 1vw, 1.5em);
+}
+
+.starvation-bar {
+    height: .7em;
+    width: 100%;
+    background: rgb(204, 0, 0);
+    border: 1px solid white;
+}
+
 /* CSS Animation */
 @keyframes foodSpawn {
     0% {

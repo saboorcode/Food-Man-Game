@@ -33,6 +33,7 @@ function game() {
     scoreBoard();
     grandmaSprite();
     requestAnimationFrame(collisionDetection); // Collision-detection, continous check with collision objects (foods or grandma) per animation frame.
+    starvationBarFunc();
 
     function sprite() {
         spriteMovementController();
@@ -236,10 +237,7 @@ function game() {
                     // DOM API allows us to remove an element (specific food collided with food man) using DOMElement.remove()
                     
                     collisionObject.remove();
-                    const result = scoreBoard();
-                    alert(`Grandma catched you! Game Over!\nTime Played: ${result[0]} seconds\nFoods Eaten: ${result[1]}`);
-                    
-                    window.location.reload(); // Game Restart
+                    endGame("grandma");
                 }
             } else if (collisionObject.classList.value.includes("food")) { // Remove specific food that collided with Food Man
                 // Detect and remove food collided with food man using collision detection algorithm
@@ -261,11 +259,23 @@ function game() {
         const totalScore = document.createElement("p");
         totalScore.classList.add("total-score");
 
+        const starvationBarDiv = document.createElement("div");
+        starvationBarDiv.classList.add("starvation-bar-div");
+        const starvationP = document.createElement("p");
+        starvationP.textContent = "Starvation: ";
+
+        const starvationBar = document.createElement("div");
+        starvationBar.classList.add("starvation-bar");
+
+        starvationBarDiv.appendChild(starvationP);
+        starvationBarDiv.appendChild(starvationBar);
+
         const timer = document.createElement("p");
         timer.classList.add("timer");
         timer.textContent = `Time played: ${gameClock}s`;
 
-        scoreBoard.appendChild(timer);
+        //scoreBoard.appendChild(timer);
+        scoreBoard.appendChild(starvationBarDiv);
         scoreBoard.appendChild(totalScore);
         gameScreen.appendChild(scoreBoard);
 
@@ -285,6 +295,48 @@ function game() {
         foodsSpawnedCount -= 1;
 
         document.querySelector(".total-score").textContent = `Foods Eaten: ${foodsEatenCount}`;
+    }
+
+    function starvationBarFunc(){
+        let foodsCountFlag = 0;
+
+        const bar = document.querySelector(".starvation-bar");
+        bar.style.width = "100%";
+
+        setInterval(() => {
+            if (parseInt(bar.style.width)-3 <= 0){
+                bar.style.width = `0%`;
+                endGame("starvation");
+            } else {
+                bar.style.width = `${parseInt(bar.style.width)-3}%`;
+            }
+        }, 1000);
+
+        function increaseBarWidth(){
+            if (foodsEatenCount > foodsCountFlag){
+                if (parseInt(bar.style.width)+5 >= 100){
+                    bar.style.width = `100%`;
+                } else {
+                    bar.style.width = `${parseInt(bar.style.width)+5}%`;
+                }
+                foodsCountFlag = foodsEatenCount;
+            }
+
+            requestAnimationFrame(increaseBarWidth);
+        }
+
+        requestAnimationFrame(increaseBarWidth);
+
+        /* 
+        function starvationBar(){
+            
+
+            
+        }
+        requestAnimationFrame(starvationBar);
+        */
+
+        console.log(bar.style.width)
     }
 
     function grandmaSprite() {
@@ -365,6 +417,22 @@ function game() {
                     grandmaSpeed = speed * .3;
                 }
             }, 5000);
+        }
+    }
+
+    function endGame(status){
+        if (status === "grandma"){
+            const result = scoreBoard();
+            alert(`Grandma catched you! Game Over!\nTime Played: ${result[0]} seconds\nFoods Eaten: ${result[1]}`);
+            
+            window.location.reload(); // Game Restart
+        }
+
+        if (status === "starvation"){
+            const result = scoreBoard();
+            alert(`Food-Man Starved... Game Over!\nTime Played: ${result[0]} seconds\nFoods Eaten: ${result[1]}`);
+            
+            window.location.reload(); // Game Restart
         }
     }
 }
