@@ -1,6 +1,10 @@
 # Food-Man Game
 
+README Write Up Coming Soon. I'm currently testing the game.
+
+<!--
 <img width="600" height="600" alt="image" src="https://github.com/user-attachments/assets/e6304d92-8cf7-4053-9738-44b29ada6ff6" />
+-->
 
 <img width="1455" height="952" alt="Screenshot 2025-10-04 115214" src="https://github.com/user-attachments/assets/a905585e-fc76-4720-968a-511709d771b6" />
 
