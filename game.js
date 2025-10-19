@@ -8,6 +8,8 @@ function game() {
     let gameScreenWidth = gameScreen.offsetWidth - 50;
     let gameScreenHeight = gameScreen.offsetHeight - 50;
 
+    console.log(gameScreenWidth, "x", gameScreenHeight)
+
     // https://developer.mozilla.org/en-US/docs/Web/CSS/translate
     // Default x, y values - centers sprite on screen as start position
     let playerPositionX = gameScreenWidth / 2;
@@ -47,12 +49,15 @@ function game() {
 
         const character = document.createElement("div");
         character.classList.add("food-man");
-        const sprite = document.createElement("img");
 
-        const arraySpriteLayers = ["/assets/sprites/sprite_1.png", "/assets/sprites/sprite_2.png"];
-        sprite.src = arraySpriteLayers[1];
 
-        character.appendChild(sprite);
+        const foodManClosedMouth = new Image();
+        foodManClosedMouth.src = "/assets/sprites/food-man-closed-mouth.png";
+
+        const foodManOpenedMouth = new Image();
+        foodManOpenedMouth.src = "/assets/sprites/food-man-opened-mouth.png";
+
+        character.appendChild(foodManClosedMouth);
 
         gameScreen.appendChild(character);
 
@@ -127,7 +132,13 @@ function game() {
 
         function animateSprite() {
             setInterval(() => { // Switches sprite layer every 150ms (.15 seconds) | 1000ms = 1 second
-                sprite.src = sprite.src.includes(arraySpriteLayers[0]) ? arraySpriteLayers[1] : arraySpriteLayers[0];
+                if (character.children[0].src === foodManClosedMouth.src){
+                    character.replaceChildren();
+                    character.appendChild(foodManOpenedMouth);
+                } else if (character.children[0].src === foodManOpenedMouth.src){
+                    character.replaceChildren();
+                    character.appendChild(foodManClosedMouth);
+                }
             }, 150);
         }
 
@@ -193,6 +204,29 @@ function game() {
     }
 
     function foodSpawner() {
+        const burger = new Image();
+        burger.src = `/assets/sprites/food/burger.png`;
+
+        const donut = new Image();
+        donut.src = `/assets/sprites/food/donut.png`;
+
+        const drink = new Image();
+        drink.src = `/assets/sprites/food/drink.png`;
+
+        const fries = new Image();
+        fries.src = `/assets/sprites/food/fries.png`;
+
+        const hotdog = new Image();
+        hotdog.src = `/assets/sprites/food/hotdog.png`;
+
+        const icecream = new Image();
+        icecream.src = `/assets/sprites/food/icecream.png`;
+
+        const pizza = new Image();
+        pizza.src = `/assets/sprites/food/pizza.png`;
+
+        const foods = [burger, donut, drink, fries, hotdog, icecream, pizza];
+
         spawnGeneratedFood(); // Spawn first food
 
         // Spawn food every 2-6 second(s) throughout the game
@@ -207,10 +241,7 @@ function game() {
             const food = document.createElement("div");
             food.classList.add("food", "collision-object");
 
-            const foodImg = document.createElement("img");
-            foodImg.src = `/assets/sprites/food/food${Math.ceil(Math.random() * 7)}.png`;
-
-            food.appendChild(foodImg);
+            food.appendChild(foods[Math.ceil(Math.random() * 7)]);
 
             food.style.translate = `${foodPosition[0]}px ${foodPosition[1]}px`;
             gameScreen.appendChild(food);
@@ -325,34 +356,45 @@ function game() {
     }
 
     function grandmaSprite() {
-        const grandmaSpriteLayers = {
-            sleepOne: "/assets/sprites/grandma/sleep-one.png",
-            sleepTwo: "/assets/sprites/grandma/sleep-two.png",
-            awake: "/assets/sprites/grandma/awake.png",
-            chasing: "/assets/sprites/grandma/chasing.png",
-            angry: "/assets/sprites/grandma/angry.png"
-        }
+        const sleepOne = new Image();
+        sleepOne.src = "/assets/sprites/grandma/sleep-one.png";
+
+        const sleepTwo = new Image();
+        sleepTwo.src = "/assets/sprites/grandma/sleep-two.png";
+
+        const awake = new Image();
+        awake.src = "/assets/sprites/grandma/awake.png";
+
+        const chasing = new Image();
+        chasing.src = "/assets/sprites/grandma/chasing.png";
+
+        const angry = new Image();
+        angry.src = "/assets/sprites/grandma/angry.png";
+
+
 
         const grandma = document.createElement("div");
         grandma.classList.add("grandma");
-        const grandmaImg = document.createElement("img");
-        grandmaImg.src = grandmaSpriteLayers.sleepOne;
+
         grandma.style.translate = "15px 15px";
 
-        grandma.appendChild(grandmaImg);
+        grandma.appendChild(sleepOne);
 
         gameScreen.appendChild(grandma);
 
         const sleepingGrandmaInterval = setInterval(() => { // Animate Sleeping GrandMa at Page load
-            if (grandmaImg.src.includes(grandmaSpriteLayers.sleepOne)) {
-                grandmaImg.src = grandmaSpriteLayers.sleepTwo;
+            if (grandma.children[0].src === sleepOne.src) {
+                grandma.replaceChildren();
+                grandma.appendChild(sleepTwo);
             } else {
-                grandmaImg.src = grandmaSpriteLayers.sleepOne;
+                grandma.replaceChildren();
+                grandma.appendChild(sleepOne);
             }
 
             if (foodEatenCount >= 1) {
                 clearInterval(sleepingGrandmaInterval);
-                grandmaImg.src = grandmaSpriteLayers.awake;
+                grandma.replaceChildren();
+                grandma.appendChild(awake);
                 grandma.classList.add("collision-object");
 
                 setTimeout(() => {
@@ -362,7 +404,8 @@ function game() {
         }, 300);
 
         function grandmaChase() {
-            grandmaImg.src = grandmaSpriteLayers.chasing;
+            grandma.replaceChildren();
+            grandma.appendChild(chasing);
 
             let grandmaplayerPositionX = grandma.style.translate.replaceAll("px", "").split(" ").map((x) => parseInt(x))[0];
             let grandmaplayerPositionY = grandma.style.translate.replaceAll("px", "").split(" ").map((x) => parseInt(x))[1];
@@ -393,11 +436,13 @@ function game() {
             requestAnimationFrame(grandmaChaseAnimation);
 
             setInterval(() => {
-                if (grandmaImg.src.includes(grandmaSpriteLayers.chasing)) {
-                    grandmaImg.src = grandmaSpriteLayers.angry;
+                if (grandma.children[0].src === chasing.src) {
+                    grandma.replaceChildren();
+                    grandma.appendChild(angry);
                     grandmaplayerSpeed = playerSpeed * .6;
                 } else {
-                    grandmaImg.src = grandmaSpriteLayers.chasing;
+                    grandma.replaceChildren();
+                    grandma.appendChild(chasing);
                     grandmaplayerSpeed = playerSpeed * .3;
                 }
             }, 5000);
