@@ -2,15 +2,12 @@ game(); // Start game | Hungry Food Man Game
 
 function game() {
     const gameScreen = document.querySelector("main");
-    gameScreen.replaceChildren(); // Clears out everything on game screen like food spawns just in case for a Game Restart, game() return statement is already provided to exits early.
+    gameScreen.replaceChildren(); // Clears out everything on game screen
 
     // https://developer.mozilla.org/en-US/docs/Web/API/CSS_Object_Model/Determining_the_dimensions_of_elements
+    // Determine the dimensions of Game Screen prior to gameplay. I use this to calculate spawn positions of Food-Man, Grandma and Foods.
     let gameScreenWidth = gameScreen.offsetWidth - 50;
     let gameScreenHeight = gameScreen.offsetHeight - 50;
-
-    // Pre-defined boundary
-    const xBoundaries = [5, gameScreenWidth];
-    const yBoundaries = [5, gameScreenHeight];
 
     // https://developer.mozilla.org/en-US/docs/Web/CSS/translate
     // Default x, y values - centers sprite on screen as start position
@@ -26,7 +23,6 @@ function game() {
 
     let foodsSpawnedCount = 0;
 
-
     /* Hoisted Function Calls */
     sprite(); // Create Food Man sprite - spawns it on web page, moves it with player's control using Keyboard Event API and Mobile Touch Control
     foodSpawn(); // Spawn Foods.. (one food spawn at page load and spawns a food every 3-9 seconds)
@@ -34,6 +30,7 @@ function game() {
     grandmaSprite();
     requestAnimationFrame(collisionDetection); // Collision-detection, continous check with collision objects (foods or grandma) per animation frame.
     starvationBarFunc();
+    resizeOutOfBounds();
 
     function sprite() {
         spriteMovementController();
@@ -53,8 +50,6 @@ function game() {
 
 
         character.style.translate = `${xPosition}px ${yPosition}px`;
-
-
 
 
         // Move Sprite. Listen to WASD, Arrow Key, and Mobile Touch Button Presses.
@@ -176,7 +171,7 @@ function game() {
 
         function boundary(x, y) {
             // Check sprite's position against boundary, return true if sprite is still inside.  Returns false otherwise.
-            if (xBoundaries[0] < x && x < xBoundaries[1] && yBoundaries[0] < y && y < yBoundaries[1]) {
+            if (5 < x && x < gameScreenWidth && 5 < y && y < gameScreenHeight) {
                 return true;
             } else {
                 return false;
@@ -235,7 +230,7 @@ function game() {
                 if (xPositionFoodMan > (xPositionObjectItem - 16) && xPositionFoodMan < (xPositionObjectItem + 57) && yPositionFoodMan > yPositionObjectItem && yPositionFoodMan < (yPositionObjectItem + 72)) {
                     // Specific food collided with food man
                     // DOM API allows us to remove an element (specific food collided with food man) using DOMElement.remove()
-                    
+
                     collisionObject.remove();
                     endGame("grandma");
                 }
@@ -287,7 +282,7 @@ function game() {
 
         foodsEatenCounter(); // Initial score of 0.
 
-        return [gameClock, foodsEatenCount];
+        return [gameClock, foodsEatenCount - 1];
     }
 
     function foodsEatenCounter() { // Increase "Foods Eaten" Score by 1 on the Score Board
@@ -297,27 +292,27 @@ function game() {
         document.querySelector(".total-score").textContent = `Foods Eaten: ${foodsEatenCount}`;
     }
 
-    function starvationBarFunc(){
+    function starvationBarFunc() {
         let foodsCountFlag = 0;
 
         const bar = document.querySelector(".starvation-bar");
         bar.style.width = "100%";
 
         setInterval(() => {
-            if (parseInt(bar.style.width)-3 <= 0){
+            if (parseInt(bar.style.width) - 3 <= 0) {
                 bar.style.width = `0%`;
                 endGame("starvation");
             } else {
-                bar.style.width = `${parseInt(bar.style.width)-3}%`;
+                bar.style.width = `${parseInt(bar.style.width) - 3}%`;
             }
         }, 1000);
 
-        function increaseBarWidth(){
-            if (foodsEatenCount > foodsCountFlag){
-                if (parseInt(bar.style.width)+5 >= 100){
+        function increaseBarWidth() {
+            if (foodsEatenCount > foodsCountFlag) {
+                if (parseInt(bar.style.width) + 5 >= 100) {
                     bar.style.width = `100%`;
                 } else {
-                    bar.style.width = `${parseInt(bar.style.width)+5}%`;
+                    bar.style.width = `${parseInt(bar.style.width) + 5}%`;
                 }
                 foodsCountFlag = foodsEatenCount;
             }
@@ -326,17 +321,6 @@ function game() {
         }
 
         requestAnimationFrame(increaseBarWidth);
-
-        /* 
-        function starvationBar(){
-            
-
-            
-        }
-        requestAnimationFrame(starvationBar);
-        */
-
-        console.log(bar.style.width)
     }
 
     function grandmaSprite() {
@@ -420,18 +404,56 @@ function game() {
         }
     }
 
-    function endGame(status){
-        if (status === "grandma"){
+    function resizeOutOfBounds() {
+        addEventListener("resize", (event) => {
+            gameScreenWidth = gameScreen.offsetWidth - 50;
+            gameScreenHeight = gameScreen.offsetHeight - 50;
+
+            const foods = document.querySelectorAll(".food");
+            const foodMan = document.querySelector(".food-man");
+
+            for (const food of foods){
+                // food is an element, we can manipulate its position using DOM API
+                const foodPosition = food.style.translate.split(" ").map((pos) => parseInt(pos));
+
+                if (foodPosition[0] >= gameScreenWidth){
+                    food.style.translate = `${gameScreenWidth}px ${foodPosition[1]}px`;
+                }
+
+                if (foodPosition[1] >= gameScreenHeight){
+                    food.style.translate = `${foodPosition[0]}px ${gameScreenHeight}px`;
+                }
+
+                if (foodPosition[1] <= 10){
+                    food.style.translate = `${foodPosition[0]}px ${10}px`;
+                }
+
+            }
+
+            if (xPosition >= gameScreenWidth) {
+                xPosition = gameScreenWidth;
+                foodMan.style.translate = `${xPosition}px ${yPosition}px`;
+            }
+
+            if (yPosition <= 5 || yPosition >= gameScreenHeight) {
+                yPosition =  gameScreenHeight;
+                foodMan.style.translate = `${xPosition}px ${yPosition}px`;
+            }
+        });
+    }
+
+    function endGame(status) {
+        if (status === "grandma") {
             const result = scoreBoard();
             alert(`Grandma catched you! Game Over!\nTime Played: ${result[0]} seconds\nFoods Eaten: ${result[1]}`);
-            
+
             window.location.reload(); // Game Restart
         }
 
-        if (status === "starvation"){
+        if (status === "starvation") {
             const result = scoreBoard();
             alert(`Food-Man Starved... Game Over!\nTime Played: ${result[0]} seconds\nFoods Eaten: ${result[1]}`);
-            
+
             window.location.reload(); // Game Restart
         }
     }
