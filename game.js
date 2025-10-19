@@ -2,11 +2,14 @@ game(); // Start game | Hungry Food Man Game
 
 function game() {
     const gameScreen = document.querySelector("main");
+    gameScreen.style.height = "85vh";
 
     // https://developer.mozilla.org/en-US/docs/Web/API/CSS_Object_Model/Determining_the_dimensions_of_elements
     // Determine the dimensions of Game Screen prior to gameplay. I use this to calculate spawn positions of Food-Man, Grandma and Foods.
     let gameScreenWidth = gameScreen.offsetWidth - 50;
     let gameScreenHeight = gameScreen.offsetHeight - 50;
+
+    console.log(gameScreen)
 
     // https://developer.mozilla.org/en-US/docs/Web/CSS/translate
     // Default x, y values - centers sprite on screen as start position
@@ -130,10 +133,10 @@ function game() {
 
         function animateSprite() {
             setInterval(() => { // Switches sprite layer every 150ms (.15 seconds) | 1000ms = 1 second
-                if (foodManPlayer.children[0].src === foodManClosedMouth.src){
+                if (foodManPlayer.children[0].src === foodManClosedMouth.src) {
                     foodManPlayer.replaceChildren();
                     foodManPlayer.appendChild(foodManOpenedMouth);
-                } else if (foodManPlayer.children[0].src === foodManOpenedMouth.src){
+                } else if (foodManPlayer.children[0].src === foodManOpenedMouth.src) {
                     foodManPlayer.replaceChildren();
                     foodManPlayer.appendChild(foodManClosedMouth);
                 }
@@ -141,51 +144,51 @@ function game() {
         }
 
         function moveSprite() {
-                // Resets player sprite rotation
-                foodManPlayer.style.rotate = "0deg";
-                foodManPlayer.style.transform = "rotateY(0deg)";
+            // Resets player sprite rotation
+            foodManPlayer.style.rotate = "0deg";
+            foodManPlayer.style.transform = "rotateY(0deg)";
 
-                switch (playerDirection) {
-                    case "UP":
-                        // check if current xPos, yPos is within pre-defined boundary
-                        // One parameter is adjusted, reversely in a specified playerDirection to prevent foodman being trapped at boundary
-                        if (boundary(playerPositionX, playerPositionY - playerSpeed)) {
-                            // Increase/decrease x, y position and positions sprite accordingly using CSS
-                            playerPositionY -= playerSpeed;
-                            foodManPlayer.style.translate = `${playerPositionX}px ${playerPositionY}px`;
-                            foodManPlayer.style.rotate = "-90deg";
-                            prevPlayerDirection = playerDirection;
-                        }
-                        break;
-                    case "LEFT":
-                        if (boundary(playerPositionX - playerSpeed, playerPositionY)) {
-                            playerPositionX -= playerSpeed;
-                            foodManPlayer.style.translate = `${playerPositionX}px ${playerPositionY}px`;
-                            foodManPlayer.style.transform = "rotateY(180deg)";
-                            prevPlayerDirection = playerDirection;
-                        }
-                        break;
-                    case "DOWN":
-                        if (boundary(playerPositionX, playerPositionY + playerSpeed)) {
-                            playerPositionY += playerSpeed;
-                            foodManPlayer.style.translate = `${playerPositionX}px ${playerPositionY}px`;
-                            foodManPlayer.style.rotate = "90deg";
-                            prevPlayerDirection = playerDirection;
-                        }
-                        break;
-                    case "RIGHT":
-                        if (boundary(playerPositionX + playerSpeed, playerPositionY)) {
-                            playerPositionX += playerSpeed;
-                            foodManPlayer.style.translate = `${playerPositionX}px ${playerPositionY}px`;
-                            foodManPlayer.style.rotate = "0deg";
-                            prevPlayerDirection = playerDirection;
-                        }
-                        break;
-                    case "STOP":
+            switch (playerDirection) {
+                case "UP":
+                    // check if current xPos, yPos is within pre-defined boundary
+                    // One parameter is adjusted, reversely in a specified playerDirection to prevent foodman being trapped at boundary
+                    if (boundary(playerPositionX, playerPositionY - playerSpeed)) {
+                        // Increase/decrease x, y position and positions sprite accordingly using CSS
+                        playerPositionY -= playerSpeed;
+                        foodManPlayer.style.translate = `${playerPositionX}px ${playerPositionY}px`;
+                        foodManPlayer.style.rotate = "-90deg";
                         prevPlayerDirection = playerDirection;
-                        // do nothing
-                        break;
-                }
+                    }
+                    break;
+                case "LEFT":
+                    if (boundary(playerPositionX - playerSpeed, playerPositionY)) {
+                        playerPositionX -= playerSpeed;
+                        foodManPlayer.style.translate = `${playerPositionX}px ${playerPositionY}px`;
+                        foodManPlayer.style.transform = "rotateY(180deg)";
+                        prevPlayerDirection = playerDirection;
+                    }
+                    break;
+                case "DOWN":
+                    if (boundary(playerPositionX, playerPositionY + playerSpeed)) {
+                        playerPositionY += playerSpeed;
+                        foodManPlayer.style.translate = `${playerPositionX}px ${playerPositionY}px`;
+                        foodManPlayer.style.rotate = "90deg";
+                        prevPlayerDirection = playerDirection;
+                    }
+                    break;
+                case "RIGHT":
+                    if (boundary(playerPositionX + playerSpeed, playerPositionY)) {
+                        playerPositionX += playerSpeed;
+                        foodManPlayer.style.translate = `${playerPositionX}px ${playerPositionY}px`;
+                        foodManPlayer.style.rotate = "0deg";
+                        prevPlayerDirection = playerDirection;
+                    }
+                    break;
+                case "STOP":
+                    prevPlayerDirection = playerDirection;
+                    // do nothing
+                    break;
+            }
 
             requestAnimationFrame(moveSprite);
         }
@@ -203,24 +206,19 @@ function game() {
 
     function foodSpawner() {
         const burger = new Image();
-        burger.src = `/assets/sprites/food/burger.png`;
-
         const donut = new Image();
-        donut.src = `/assets/sprites/food/donut.png`;
-
         const drink = new Image();
-        drink.src = `/assets/sprites/food/drink.png`;
-
         const fries = new Image();
-        fries.src = `/assets/sprites/food/fries.png`;
-
         const hotdog = new Image();
-        hotdog.src = `/assets/sprites/food/hotdog.png`;
-
         const icecream = new Image();
-        icecream.src = `/assets/sprites/food/icecream.png`;
-
         const pizza = new Image();
+
+        burger.src = `/assets/sprites/food/burger.png`;
+        donut.src = `/assets/sprites/food/donut.png`;
+        drink.src = `/assets/sprites/food/drink.png`;
+        fries.src = `/assets/sprites/food/fries.png`;
+        hotdog.src = `/assets/sprites/food/hotdog.png`;
+        icecream.src = `/assets/sprites/food/icecream.png`;
         pizza.src = `/assets/sprites/food/pizza.png`;
 
         const foods = [burger, donut, drink, fries, hotdog, icecream, pizza];
