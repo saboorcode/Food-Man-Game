@@ -8,8 +8,6 @@ function game() {
     let gameScreenWidth = gameScreen.offsetWidth - 50;
     let gameScreenHeight = gameScreen.offsetHeight - 50;
 
-    console.log(gameScreenWidth, "x", gameScreenHeight)
-
     // https://developer.mozilla.org/en-US/docs/Web/CSS/translate
     // Default x, y values - centers sprite on screen as start position
     let playerPositionX = gameScreenWidth / 2;
@@ -47,8 +45,8 @@ function game() {
         animateSprite();
         requestAnimationFrame(moveSprite);
 
-        const character = document.createElement("div");
-        character.classList.add("food-man");
+        const foodManPlayer = document.createElement("div");
+        foodManPlayer.classList.add("food-man");
 
 
         const foodManClosedMouth = new Image();
@@ -57,12 +55,12 @@ function game() {
         const foodManOpenedMouth = new Image();
         foodManOpenedMouth.src = "/assets/sprites/food-man-opened-mouth.png";
 
-        character.appendChild(foodManClosedMouth);
+        foodManPlayer.appendChild(foodManClosedMouth);
 
-        gameScreen.appendChild(character);
+        gameScreen.appendChild(foodManPlayer);
 
 
-        character.style.translate = `${playerPositionX}px ${playerPositionY}px`;
+        foodManPlayer.style.translate = `${playerPositionX}px ${playerPositionY}px`;
 
 
         // Move Sprite. Listen to WASD, Arrow Key, and Mobile Touch Button Presses.
@@ -132,20 +130,20 @@ function game() {
 
         function animateSprite() {
             setInterval(() => { // Switches sprite layer every 150ms (.15 seconds) | 1000ms = 1 second
-                if (character.children[0].src === foodManClosedMouth.src){
-                    character.replaceChildren();
-                    character.appendChild(foodManOpenedMouth);
-                } else if (character.children[0].src === foodManOpenedMouth.src){
-                    character.replaceChildren();
-                    character.appendChild(foodManClosedMouth);
+                if (foodManPlayer.children[0].src === foodManClosedMouth.src){
+                    foodManPlayer.replaceChildren();
+                    foodManPlayer.appendChild(foodManOpenedMouth);
+                } else if (foodManPlayer.children[0].src === foodManOpenedMouth.src){
+                    foodManPlayer.replaceChildren();
+                    foodManPlayer.appendChild(foodManClosedMouth);
                 }
             }, 150);
         }
 
         function moveSprite() {
                 // Resets player sprite rotation
-                character.style.rotate = "0deg";
-                character.style.transform = "rotateY(0deg)";
+                foodManPlayer.style.rotate = "0deg";
+                foodManPlayer.style.transform = "rotateY(0deg)";
 
                 switch (playerDirection) {
                     case "UP":
@@ -154,32 +152,32 @@ function game() {
                         if (boundary(playerPositionX, playerPositionY - playerSpeed)) {
                             // Increase/decrease x, y position and positions sprite accordingly using CSS
                             playerPositionY -= playerSpeed;
-                            character.style.translate = `${playerPositionX}px ${playerPositionY}px`;
-                            character.style.rotate = "-90deg";
+                            foodManPlayer.style.translate = `${playerPositionX}px ${playerPositionY}px`;
+                            foodManPlayer.style.rotate = "-90deg";
                             prevPlayerDirection = playerDirection;
                         }
                         break;
                     case "LEFT":
                         if (boundary(playerPositionX - playerSpeed, playerPositionY)) {
                             playerPositionX -= playerSpeed;
-                            character.style.translate = `${playerPositionX}px ${playerPositionY}px`;
-                            character.style.transform = "rotateY(180deg)";
+                            foodManPlayer.style.translate = `${playerPositionX}px ${playerPositionY}px`;
+                            foodManPlayer.style.transform = "rotateY(180deg)";
                             prevPlayerDirection = playerDirection;
                         }
                         break;
                     case "DOWN":
                         if (boundary(playerPositionX, playerPositionY + playerSpeed)) {
                             playerPositionY += playerSpeed;
-                            character.style.translate = `${playerPositionX}px ${playerPositionY}px`;
-                            character.style.rotate = "90deg";
+                            foodManPlayer.style.translate = `${playerPositionX}px ${playerPositionY}px`;
+                            foodManPlayer.style.rotate = "90deg";
                             prevPlayerDirection = playerDirection;
                         }
                         break;
                     case "RIGHT":
                         if (boundary(playerPositionX + playerSpeed, playerPositionY)) {
                             playerPositionX += playerSpeed;
-                            character.style.translate = `${playerPositionX}px ${playerPositionY}px`;
-                            character.style.rotate = "0deg";
+                            foodManPlayer.style.translate = `${playerPositionX}px ${playerPositionY}px`;
+                            foodManPlayer.style.rotate = "0deg";
                             prevPlayerDirection = playerDirection;
                         }
                         break;
@@ -241,7 +239,7 @@ function game() {
             const food = document.createElement("div");
             food.classList.add("food", "collision-object");
 
-            food.appendChild(foods[Math.ceil(Math.random() * 7)]);
+            food.appendChild(foods[Math.ceil(Math.random() * 6)]);
 
             food.style.translate = `${foodPosition[0]}px ${foodPosition[1]}px`;
             gameScreen.appendChild(food);
@@ -356,20 +354,20 @@ function game() {
     }
 
     function grandmaSprite() {
-        const sleepOne = new Image();
-        sleepOne.src = "/assets/sprites/grandma/sleep-one.png";
+        const grandmaSleepOne = new Image();
+        grandmaSleepOne.src = "/assets/sprites/grandma/grandma-sleepingone.png";
 
-        const sleepTwo = new Image();
-        sleepTwo.src = "/assets/sprites/grandma/sleep-two.png";
+        const grandmaSleepTwo = new Image();
+        grandmaSleepTwo.src = "/assets/sprites/grandma/grandma-sleepingtwo.png";
 
-        const awake = new Image();
-        awake.src = "/assets/sprites/grandma/awake.png";
+        const grandmaAwake = new Image();
+        grandmaAwake.src = "/assets/sprites/grandma/grandma-awake.png";
 
-        const chasing = new Image();
-        chasing.src = "/assets/sprites/grandma/chasing.png";
+        const grandmaChasing = new Image();
+        grandmaChasing.src = "/assets/sprites/grandma/grandma-chasing.png";
 
-        const angry = new Image();
-        angry.src = "/assets/sprites/grandma/angry.png";
+        const grandmaAngry = new Image();
+        grandmaAngry.src = "/assets/sprites/grandma/grandma-angry.png";
 
 
 
@@ -378,23 +376,23 @@ function game() {
 
         grandma.style.translate = "15px 15px";
 
-        grandma.appendChild(sleepOne);
+        grandma.appendChild(grandmaSleepOne);
 
         gameScreen.appendChild(grandma);
 
         const sleepingGrandmaInterval = setInterval(() => { // Animate Sleeping GrandMa at Page load
-            if (grandma.children[0].src === sleepOne.src) {
+            if (grandma.children[0].src === grandmaSleepOne.src) {
                 grandma.replaceChildren();
-                grandma.appendChild(sleepTwo);
+                grandma.appendChild(grandmaSleepTwo);
             } else {
                 grandma.replaceChildren();
-                grandma.appendChild(sleepOne);
+                grandma.appendChild(grandmaSleepOne);
             }
 
             if (foodEatenCount >= 1) {
                 clearInterval(sleepingGrandmaInterval);
                 grandma.replaceChildren();
-                grandma.appendChild(awake);
+                grandma.appendChild(grandmaAwake);
                 grandma.classList.add("collision-object");
 
                 setTimeout(() => {
@@ -405,7 +403,7 @@ function game() {
 
         function grandmaChase() {
             grandma.replaceChildren();
-            grandma.appendChild(chasing);
+            grandma.appendChild(grandmaChasing);
 
             let grandmaplayerPositionX = grandma.style.translate.replaceAll("px", "").split(" ").map((x) => parseInt(x))[0];
             let grandmaplayerPositionY = grandma.style.translate.replaceAll("px", "").split(" ").map((x) => parseInt(x))[1];
@@ -436,13 +434,13 @@ function game() {
             requestAnimationFrame(grandmaChaseAnimation);
 
             setInterval(() => {
-                if (grandma.children[0].src === chasing.src) {
+                if (grandma.children[0].src === grandmaChasing.src) {
                     grandma.replaceChildren();
-                    grandma.appendChild(angry);
+                    grandma.appendChild(grandmaAngry);
                     grandmaplayerSpeed = playerSpeed * .6;
                 } else {
                     grandma.replaceChildren();
-                    grandma.appendChild(chasing);
+                    grandma.appendChild(grandmaChasing);
                     grandmaplayerSpeed = playerSpeed * .3;
                 }
             }, 5000);
