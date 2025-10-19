@@ -9,8 +9,6 @@ function game() {
     let gameScreenWidth = gameScreen.offsetWidth - 50;
     let gameScreenHeight = gameScreen.offsetHeight - 50;
 
-    console.log(gameScreen)
-
     // https://developer.mozilla.org/en-US/docs/Web/CSS/translate
     // Default x, y values - centers sprite on screen as start position
     let playerPositionX = gameScreenWidth / 2;
