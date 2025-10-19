@@ -1,5 +1,5 @@
 body {
-    background: rgb(58, 0, 0);
+    background: #3d0403;
     color: rgb(240, 240, 240);
     text-align: center;
     margin: 0 auto;
@@ -13,7 +13,7 @@ body {
 
 main {
     position: relative;
-    background: rgb(156, 0, 0);
+    background: #6b1b00;
     height: 85vh;
     border: 5px inset rgb(235, 255, 57);
 }
@@ -95,7 +95,7 @@ img {
 }
 
 .touch-button:active {
-    background: white;
+    background: rgb(156, 156, 156);
     color: red;
 }
 
@@ -124,7 +124,7 @@ img {
 }
 
 .touch-stop {
-    background: rgba(255, 0, 0, 0.822);
+    background: rgba(255, 0, 0, 0.651);
     width: 40px;
     height: 40px;
     position: absolute;

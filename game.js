@@ -11,25 +11,26 @@ function game() {
 
     // https://developer.mozilla.org/en-US/docs/Web/CSS/translate
     // Default x, y values - centers sprite on screen as start position
-    let xPosition = gameScreenWidth / 2;
-    let yPosition = gameScreenHeight / 2;
+    let playerPositionX = gameScreenWidth / 2;
+    let playerPositionY = gameScreenHeight / 2;
 
-    const speed = 3; // Sprite movement speed
+    const playerSpeed = 3; // Sprite movement speed
 
-    let foodsEatenCount = -1;
-    let gameClock = 0;
+    let foodEatenCount = -1;
+    let gameTimer = 0;
 
-    let foodManDirection; // Direction status: "UP", "RIGHT", etc or "STOP"
+    let playerDirection; // Direction status: "UP", "RIGHT", etc or "STOP"
 
-    let foodsSpawnedCount = 0;
+    let foodSpawnCount = 0;
+
+    let starvationBarIncrementerInterval;
 
     /* Hoisted Function Calls */
-    sprite(); // Create Food Man sprite - spawns it on web page, moves it with player's control using Keyboard Event API and Mobile Touch Control
-    foodSpawn(); // Spawn Foods.. (one food spawn at page load and spawns a food every 3-9 seconds)
+    playerSprite(); // Create Food Man sprite - spawns it on web page, moves it with player's control using Keyboard Event API and Mobile Touch Control
+    foodSpawner(); // Spawn Foods.. (one food spawn at page load and spawns a food every 3-9 seconds)
     scoreBoard();
     grandmaSprite();
     requestAnimationFrame(collisionDetection); // Collision-detection, continous check with collision objects (foods or grandma) per animation frame.
-    starvationBarFunc();
     resizeOutOfBounds(); // Check if game objects are out of bounds at page loads
 
     addEventListener("resize", (event) => { // Check if game objects are moved to out of bounds when user resizes
@@ -39,8 +40,8 @@ function game() {
         resizeOutOfBounds();
     });
 
-    function sprite() {
-        spriteMovementController();
+    function playerSprite() {
+        playerController();
         animateSprite();
         requestAnimationFrame(moveSprite);
 
@@ -56,11 +57,11 @@ function game() {
         gameScreen.appendChild(character);
 
 
-        character.style.translate = `${xPosition}px ${yPosition}px`;
+        character.style.translate = `${playerPositionX}px ${playerPositionY}px`;
 
 
         // Move Sprite. Listen to WASD, Arrow Key, and Mobile Touch Button Presses.
-        function spriteMovementController() {
+        function playerController() {
             mobileTouchControl(); // Enables Mobile Touch Control
 
             function mobileTouchControl() {
@@ -76,19 +77,19 @@ function game() {
 
                         switch (touchButtonPressed.classList[1]) {
                             case "touch-up":
-                                foodManDirection = "UP";
+                                playerDirection = "UP";
                                 break;
                             case "touch-right":
-                                foodManDirection = "RIGHT";
+                                playerDirection = "RIGHT";
                                 break;
                             case "touch-down":
-                                foodManDirection = "DOWN";
+                                playerDirection = "DOWN";
                                 break;
                             case "touch-left":
-                                foodManDirection = "LEFT";
+                                playerDirection = "LEFT";
                                 break;
                             case "touch-stop":
-                                foodManDirection = "STOP";
+                                playerDirection = "STOP";
                                 break;
                         }
                     });
@@ -103,22 +104,22 @@ function game() {
                 switch (key) {
                     case "W":
                     case "ARROWUP":
-                        foodManDirection = "UP";
+                        playerDirection = "UP";
                         break;
                     case "A":
                     case "ARROWLEFT":
-                        foodManDirection = "LEFT";
+                        playerDirection = "LEFT";
                         break;
                     case "S":
                     case "ARROWDOWN":
-                        foodManDirection = "DOWN";
+                        playerDirection = "DOWN";
                         break;
                     case "D":
                     case "ARROWRIGHT":
-                        foodManDirection = "RIGHT";
+                        playerDirection = "RIGHT";
                         break;
-                    case " ": // Space Bar, keyboardEvent API has it as " " for some reason.
-                        foodManDirection = "STOP";
+                    case " ": // Space starvationBar, keyboardEvent API has it as " " for some reason.
+                        playerDirection = "STOP";
                         break;
                 }
             });
@@ -131,40 +132,39 @@ function game() {
         }
 
         function moveSprite() {
-            //interval = setInterval(() => { // setInterval() ensures Sprite keeps moving every 100ms with a condition (foodManDirection)
-            // Resets sprite rotation
+            // Resets player sprite rotation
             character.style.rotate = "0deg";
             character.style.transform = "rotateY(0deg)";
 
-            switch (foodManDirection) {
+            switch (playerDirection) {
                 case "UP":
                     // check if current xPos, yPos is within pre-defined boundary
-                    // One parameter is adjusted, reversely in a specified foodManDirection to prevent foodman being trapped at boundary
-                    if (boundary(xPosition, yPosition - speed)) {
+                    // One parameter is adjusted, reversely in a specified playerDirection to prevent foodman being trapped at boundary
+                    if (boundary(playerPositionX, playerPositionY - playerSpeed)) {
                         // Increase/decrease x, y position and positions sprite accordingly using CSS
-                        yPosition -= speed;
-                        character.style.translate = `${xPosition}px ${yPosition}px`;
+                        playerPositionY -= playerSpeed;
+                        character.style.translate = `${playerPositionX}px ${playerPositionY}px`;
                         character.style.rotate = "-90deg";
                     }
                     break;
                 case "LEFT":
-                    if (boundary(xPosition - speed, yPosition)) {
-                        xPosition -= speed;
-                        character.style.translate = `${xPosition}px ${yPosition}px`;
+                    if (boundary(playerPositionX - playerSpeed, playerPositionY)) {
+                        playerPositionX -= playerSpeed;
+                        character.style.translate = `${playerPositionX}px ${playerPositionY}px`;
                         character.style.transform = "rotateY(180deg)";
                     }
                     break;
                 case "DOWN":
-                    if (boundary(xPosition, yPosition + speed)) {
-                        yPosition += speed;
-                        character.style.translate = `${xPosition}px ${yPosition}px`;
+                    if (boundary(playerPositionX, playerPositionY + playerSpeed)) {
+                        playerPositionY += playerSpeed;
+                        character.style.translate = `${playerPositionX}px ${playerPositionY}px`;
                         character.style.rotate = "90deg";
                     }
                     break;
                 case "RIGHT":
-                    if (boundary(xPosition + speed, yPosition)) {
-                        xPosition += speed;
-                        character.style.translate = `${xPosition}px ${yPosition}px`;
+                    if (boundary(playerPositionX + playerSpeed, playerPositionY)) {
+                        playerPositionX += playerSpeed;
+                        character.style.translate = `${playerPositionX}px ${playerPositionY}px`;
                         character.style.rotate = "0deg";
                     }
                     break;
@@ -187,12 +187,12 @@ function game() {
 
     }
 
-    function foodSpawn() {
+    function foodSpawner() {
         spawnGeneratedFood(); // Spawn first food
 
         // Spawn food every 2-6 second(s) throughout the game
         const foodSpawnInterval = setInterval(() => {
-            if (foodsSpawnedCount < 11) { // Foods spawn is capped at 10 to prevent infinite spawning, I had 50+ at some point.
+            if (foodSpawnCount < 11) { // Foods spawn is capped at 10 to prevent infinite spawning, I had 50+ at some point.
                 spawnGeneratedFood();
             }
         }, (2000 * Math.ceil(Math.random() * 3)));
@@ -210,7 +210,7 @@ function game() {
             food.style.translate = `${foodPosition[0]}px ${foodPosition[1]}px`;
             gameScreen.appendChild(food);
 
-            foodsSpawnedCount += 1;
+            foodSpawnCount += 1;
         }
     }
 
@@ -228,13 +228,13 @@ function game() {
             /* Access translate value from CSS style rules that was used to repaints on web page 
                Every food element and extracts it as [x, y] positions
             */
-            const xPositionFoodMan = xPosition + 20; // Readjusted x position of food man so it's equal to x position of object items like foods.
-            const yPositionFoodMan = yPosition + 35;
-            const xPositionObjectItem = collisionObject.style.translate.replaceAll("px", "").split(" ").map((x) => parseInt(x))[0];
-            const yPositionObjectItem = collisionObject.style.translate.replaceAll("px", "").split(" ").map((x) => parseInt(x))[1];
+            const userPositionX = playerPositionX + 20; // Readjusted x position of food man so it's equal to x position of object items like foods.
+            const userPositionY = playerPositionY + 35;
+            const collisionObjectXPosition = collisionObject.style.translate.replaceAll("px", "").split(" ").map((x) => parseInt(x))[0];
+            const collisionObjectYPosition = collisionObject.style.translate.replaceAll("px", "").split(" ").map((x) => parseInt(x))[1];
 
             if (collisionObject.classList.value.includes("grandma")) { // Grandma caught up to Food Man
-                if (xPositionFoodMan > (xPositionObjectItem - 16) && xPositionFoodMan < (xPositionObjectItem + 57) && yPositionFoodMan > yPositionObjectItem && yPositionFoodMan < (yPositionObjectItem + 72)) {
+                if (userPositionX > (collisionObjectXPosition - 16) && userPositionX < (collisionObjectXPosition + 57) && userPositionY > collisionObjectYPosition && userPositionY < (collisionObjectYPosition + 72)) {
                     // Specific food collided with food man
                     // DOM API allows us to remove an element (specific food collided with food man) using DOMElement.remove()
 
@@ -243,11 +243,11 @@ function game() {
                 }
             } else if (collisionObject.classList.value.includes("food")) { // Remove specific food that collided with Food Man
                 // Detect and remove food collided with food man using collision detection algorithm
-                if (xPositionFoodMan + 15 > xPositionObjectItem && xPositionFoodMan + 15 < xPositionObjectItem + 67 && yPositionFoodMan > yPositionObjectItem && yPositionFoodMan < yPositionObjectItem + 68) {
+                if (userPositionX + 15 > collisionObjectXPosition && userPositionX + 15 < collisionObjectXPosition + 67 && userPositionY > collisionObjectYPosition && userPositionY < collisionObjectYPosition + 68) {
                     // Specific food collided with food man
                     // DOM API allows us to remove an element (specific food collided with food man) using DOMElement.remove()
                     collisionObject.remove();
-                    foodsEatenCounter();
+                    foodCountIncrementerAndStarvationBar();
                 }
             }
         }
@@ -268,13 +268,14 @@ function game() {
 
         const starvationBar = document.createElement("div");
         starvationBar.classList.add("starvation-bar");
+        starvationBar.style.width = "100%";
 
         starvationBarDiv.appendChild(starvationP);
         starvationBarDiv.appendChild(starvationBar);
 
         const timer = document.createElement("p");
         timer.classList.add("timer");
-        timer.textContent = `Time played: ${gameClock}s`;
+        timer.textContent = `Time played: ${gameTimer}s`;
 
         //scoreBoard.appendChild(timer);
         scoreBoard.appendChild(starvationBarDiv);
@@ -282,61 +283,49 @@ function game() {
         gameScreen.appendChild(scoreBoard);
 
         setInterval(() => {
-            gameClock += 1;
+            gameTimer += 1;
 
-            timer.textContent = `Time played: ${gameClock}s`;
+            timer.textContent = `Time played: ${gameTimer}s`;
         }, 1000);
 
-        foodsEatenCounter(); // Initial score of 0.
+        foodCountIncrementerAndStarvationBar();
 
-        return [gameClock, foodsEatenCount - 1];
+        return [gameTimer, foodEatenCount - 1];
     }
 
-    function foodsEatenCounter() { // Increase "Foods Eaten" Score by 1 on the Score Board
-        foodsEatenCount += 1;
-        foodsSpawnedCount -= 1;
+    function foodCountIncrementerAndStarvationBar() {
+        clearInterval(starvationBarIncrementerInterval);
 
-        document.querySelector(".total-score").textContent = `Foods Eaten: ${foodsEatenCount}`;
-    }
+        foodEatenCount += 1;
+        foodSpawnCount -= 1;
 
-    function starvationBarFunc() {
-        let foodsCountFlag = 0;
+        document.querySelector(".total-score").textContent = `Foods Eaten: ${foodEatenCount}`;
 
-        const bar = document.querySelector(".starvation-bar");
-        bar.style.width = "100%";
+        const starvationBar = document.querySelector(".starvation-bar");
 
-        setInterval(() => {
-            if (parseInt(bar.style.width) - 3 <= 0) {
-                bar.style.width = `0%`;
+        starvationBarIncrementerInterval = setInterval(() => {
+            if (parseInt(starvationBar.style.width) - 3 <= 0) {
+                starvationBar.style.width = `0%`;
                 endGame("starvation");
             } else {
-                bar.style.width = `${parseInt(bar.style.width) - 3}%`;
+                starvationBar.style.width = `${parseInt(starvationBar.style.width) - 3}%`;
             }
         }, 1000);
 
-        function increaseBarWidth() {
-            if (foodsEatenCount > foodsCountFlag) {
-                if (parseInt(bar.style.width) + 5 >= 100) {
-                    bar.style.width = `100%`;
-                } else {
-                    bar.style.width = `${parseInt(bar.style.width) + 5}%`;
-                }
-                foodsCountFlag = foodsEatenCount;
-            }
-
-            requestAnimationFrame(increaseBarWidth);
+        if (parseInt(starvationBar.style.width) + 10 >= 100) {
+            starvationBar.style.width = `100%`;
+        } else {
+            starvationBar.style.width = `${parseInt(starvationBar.style.width) + 10}%`;
         }
-
-        requestAnimationFrame(increaseBarWidth);
     }
 
     function grandmaSprite() {
         const grandmaSpriteLayers = {
-            sleepOne: "/assets/sprites/grandma/grandma_1.png",
-            sleepTwo: "/assets/sprites/grandma/grandma_2.png",
-            awake: "/assets/sprites/grandma/grandma_3.png",
-            chasing: "/assets/sprites/grandma/grandma_4.png",
-            angry: "/assets/sprites/grandma/grandma_5.png"
+            sleepOne: "/assets/sprites/grandma/sleep-one.png",
+            sleepTwo: "/assets/sprites/grandma/sleep-two.png",
+            awake: "/assets/sprites/grandma/awake.png",
+            chasing: "/assets/sprites/grandma/chasing.png",
+            angry: "/assets/sprites/grandma/angry.png"
         }
 
         const grandma = document.createElement("div");
@@ -356,7 +345,7 @@ function game() {
                 grandmaImg.src = grandmaSpriteLayers.sleepOne;
             }
 
-            if (foodsEatenCount >= 1) {
+            if (foodEatenCount >= 1) {
                 clearInterval(sleepingGrandmaInterval);
                 grandmaImg.src = grandmaSpriteLayers.awake;
                 grandma.classList.add("collision-object");
@@ -370,29 +359,28 @@ function game() {
         function grandmaChase() {
             grandmaImg.src = grandmaSpriteLayers.chasing;
 
-            let grandmaXPosition = grandma.style.translate.replaceAll("px", "").split(" ").map((x) => parseInt(x))[0];
-            let grandmaYPosition = grandma.style.translate.replaceAll("px", "").split(" ").map((x) => parseInt(x))[1];
-            let grandmaSpeed = speed * .3; // Half of food man's speed because she's a grandma right?
+            let grandmaplayerPositionX = grandma.style.translate.replaceAll("px", "").split(" ").map((x) => parseInt(x))[0];
+            let grandmaplayerPositionY = grandma.style.translate.replaceAll("px", "").split(" ").map((x) => parseInt(x))[1];
+            let grandmaplayerSpeed = playerSpeed * .3; // Half of food man's playerSpeed because she's a grandma right?
 
             function grandmaChaseAnimation() {
                 // Recalculate food man's position and have grandma chase accordingly
-                if (grandmaXPosition < xPosition) {
-                    grandmaXPosition += grandmaSpeed;
+                if (grandmaplayerPositionX < playerPositionX) {
+                    grandmaplayerPositionX += grandmaplayerSpeed;
                 }
 
-                if (grandmaXPosition > xPosition) {
-                    grandmaXPosition -= grandmaSpeed;
+                if (grandmaplayerPositionX > playerPositionX) {
+                    grandmaplayerPositionX -= grandmaplayerSpeed;
                 }
-                //} else if (grandmaYPosition !== yPosition) {
-                if (grandmaYPosition < yPosition) {
-                    grandmaYPosition += grandmaSpeed;
-                }
-
-                if (grandmaYPosition > yPosition) {
-                    grandmaYPosition -= grandmaSpeed;
+                if (grandmaplayerPositionY < playerPositionY) {
+                    grandmaplayerPositionY += grandmaplayerSpeed;
                 }
 
-                grandma.style.translate = `${grandmaXPosition}px ${grandmaYPosition}px`;
+                if (grandmaplayerPositionY > playerPositionY) {
+                    grandmaplayerPositionY -= grandmaplayerSpeed;
+                }
+
+                grandma.style.translate = `${grandmaplayerPositionX}px ${grandmaplayerPositionY}px`;
 
                 requestAnimationFrame(grandmaChaseAnimation);
             }
@@ -402,54 +390,54 @@ function game() {
             setInterval(() => {
                 if (grandmaImg.src.includes(grandmaSpriteLayers.chasing)) {
                     grandmaImg.src = grandmaSpriteLayers.angry;
-                    grandmaSpeed = speed * .6;
+                    grandmaplayerSpeed = playerSpeed * .6;
                 } else {
                     grandmaImg.src = grandmaSpriteLayers.chasing;
-                    grandmaSpeed = speed * .3;
+                    grandmaplayerSpeed = playerSpeed * .3;
                 }
             }, 5000);
         }
     }
 
     function resizeOutOfBounds() {
-            const foods = document.querySelectorAll(".food");
-            const foodMan = document.querySelector(".food-man");
+        const foods = document.querySelectorAll(".food");
+        const foodMan = document.querySelector(".food-man");
 
-            for (const food of foods){
-                // food is an element, we can manipulate its position using DOM API
-                const foodPosition = food.style.translate.split(" ").map((pos) => parseInt(pos));
+        for (const food of foods) {
+            // food is an element, we can manipulate its position using DOM API
+            const foodPosition = food.style.translate.split(" ").map((pos) => parseInt(pos));
 
-                if (foodPosition[0] >= gameScreenWidth){
-                    food.style.translate = `${gameScreenWidth}px ${foodPosition[1]}px`;
-                }
-
-                if (foodPosition[1] >= gameScreenHeight){
-                    food.style.translate = `${foodPosition[0]}px ${gameScreenHeight}px`;
-                }
-
-                if (foodPosition[1] <= 10){
-                    food.style.translate = `${foodPosition[0]}px ${10}px`;
-                }
-
+            if (foodPosition[0] >= gameScreenWidth) {
+                food.style.translate = `${gameScreenWidth}px ${foodPosition[1]}px`;
             }
 
-            if (xPosition >= gameScreenWidth) {
-                foodManDirection = "STOP";
-                xPosition = gameScreenWidth;
-                foodMan.style.translate = `${xPosition}px ${yPosition}px`;
+            if (foodPosition[1] >= gameScreenHeight) {
+                food.style.translate = `${foodPosition[0]}px ${gameScreenHeight}px`;
             }
 
-            if (yPosition >= gameScreenHeight) {
-                foodManDirection = "STOP";
-                yPosition =  gameScreenHeight;
-                foodMan.style.translate = `${xPosition}px ${yPosition}px`;
+            if (foodPosition[1] <= 10) {
+                food.style.translate = `${foodPosition[0]}px ${10}px`;
             }
 
-            if (yPosition <= 10) {
-                foodManDirection = "STOP";
-                yPosition =  10;
-                foodMan.style.translate = `${xPosition}px ${10}px`;
-            }
+        }
+
+        if (playerPositionX >= gameScreenWidth) {
+            playerDirection = "STOP";
+            playerPositionX = gameScreenWidth;
+            foodMan.style.translate = `${playerPositionX}px ${playerPositionY}px`;
+        }
+
+        if (playerPositionY >= gameScreenHeight) {
+            playerDirection = "STOP";
+            playerPositionY = gameScreenHeight;
+            foodMan.style.translate = `${playerPositionX}px ${playerPositionY}px`;
+        }
+
+        if (playerPositionY <= 10) {
+            playerDirection = "STOP";
+            playerPositionY = 10;
+            foodMan.style.translate = `${playerPositionX}px ${10}px`;
+        }
     }
 
     function endGame(status) {
