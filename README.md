@@ -2,6 +2,8 @@
 
 README Write Up Coming Soon. I'm currently testing the game.
 
+<img width="1568" height="859" alt="Screenshot 2025-10-18 183903" src="https://github.com/user-attachments/assets/2e82f1b3-765e-4b0b-a633-ff4bdbab1d94" />
+
 <!--
 <img width="600" height="600" alt="image" src="https://github.com/user-attachments/assets/e6304d92-8cf7-4053-9738-44b29ada6ff6" />
 -->
