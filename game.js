@@ -19,7 +19,7 @@ function game() {
     let foodsEatenCount = -1;
     let gameClock = 0;
 
-    let direction;
+    let foodManDirection; // Direction status: "UP", "RIGHT", etc or "STOP"
 
     let foodsSpawnedCount = 0;
 
@@ -30,7 +30,14 @@ function game() {
     grandmaSprite();
     requestAnimationFrame(collisionDetection); // Collision-detection, continous check with collision objects (foods or grandma) per animation frame.
     starvationBarFunc();
-    resizeOutOfBounds();
+    resizeOutOfBounds(); // Check if game objects are out of bounds at page loads
+
+    addEventListener("resize", (event) => { // Check if game objects are moved to out of bounds when user resizes
+        gameScreenWidth = gameScreen.offsetWidth - 50;
+        gameScreenHeight = gameScreen.offsetHeight - 50;
+
+        resizeOutOfBounds();
+    });
 
     function sprite() {
         spriteMovementController();
@@ -69,19 +76,19 @@ function game() {
 
                         switch (touchButtonPressed.classList[1]) {
                             case "touch-up":
-                                direction = "UP";
+                                foodManDirection = "UP";
                                 break;
                             case "touch-right":
-                                direction = "RIGHT";
+                                foodManDirection = "RIGHT";
                                 break;
                             case "touch-down":
-                                direction = "DOWN";
+                                foodManDirection = "DOWN";
                                 break;
                             case "touch-left":
-                                direction = "LEFT";
+                                foodManDirection = "LEFT";
                                 break;
                             case "touch-stop":
-                                direction = "STOP";
+                                foodManDirection = "STOP";
                                 break;
                         }
                     });
@@ -96,22 +103,22 @@ function game() {
                 switch (key) {
                     case "W":
                     case "ARROWUP":
-                        direction = "UP";
+                        foodManDirection = "UP";
                         break;
                     case "A":
                     case "ARROWLEFT":
-                        direction = "LEFT";
+                        foodManDirection = "LEFT";
                         break;
                     case "S":
                     case "ARROWDOWN":
-                        direction = "DOWN";
+                        foodManDirection = "DOWN";
                         break;
                     case "D":
                     case "ARROWRIGHT":
-                        direction = "RIGHT";
+                        foodManDirection = "RIGHT";
                         break;
                     case " ": // Space Bar, keyboardEvent API has it as " " for some reason.
-                        direction = "STOP";
+                        foodManDirection = "STOP";
                         break;
                 }
             });
@@ -124,15 +131,15 @@ function game() {
         }
 
         function moveSprite() {
-            //interval = setInterval(() => { // setInterval() ensures Sprite keeps moving every 100ms with a condition (direction)
+            //interval = setInterval(() => { // setInterval() ensures Sprite keeps moving every 100ms with a condition (foodManDirection)
             // Resets sprite rotation
             character.style.rotate = "0deg";
             character.style.transform = "rotateY(0deg)";
 
-            switch (direction) {
+            switch (foodManDirection) {
                 case "UP":
                     // check if current xPos, yPos is within pre-defined boundary
-                    // One parameter is adjusted, reversely in a specified direction to prevent foodman being trapped at boundary
+                    // One parameter is adjusted, reversely in a specified foodManDirection to prevent foodman being trapped at boundary
                     if (boundary(xPosition, yPosition - speed)) {
                         // Increase/decrease x, y position and positions sprite accordingly using CSS
                         yPosition -= speed;
@@ -405,10 +412,6 @@ function game() {
     }
 
     function resizeOutOfBounds() {
-        addEventListener("resize", (event) => {
-            gameScreenWidth = gameScreen.offsetWidth - 50;
-            gameScreenHeight = gameScreen.offsetHeight - 50;
-
             const foods = document.querySelectorAll(".food");
             const foodMan = document.querySelector(".food-man");
 
@@ -431,15 +434,22 @@ function game() {
             }
 
             if (xPosition >= gameScreenWidth) {
+                foodManDirection = "STOP";
                 xPosition = gameScreenWidth;
                 foodMan.style.translate = `${xPosition}px ${yPosition}px`;
             }
 
-            if (yPosition <= 5 || yPosition >= gameScreenHeight) {
+            if (yPosition >= gameScreenHeight) {
+                foodManDirection = "STOP";
                 yPosition =  gameScreenHeight;
                 foodMan.style.translate = `${xPosition}px ${yPosition}px`;
             }
-        });
+
+            if (yPosition <= 10) {
+                foodManDirection = "STOP";
+                yPosition =  10;
+                foodMan.style.translate = `${xPosition}px ${10}px`;
+            }
     }
 
     function endGame(status) {
