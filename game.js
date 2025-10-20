@@ -9,18 +9,21 @@ function game() {
     let gameScreenWidth = gameScreen.offsetWidth - 50;
     let gameScreenHeight = gameScreen.offsetHeight - 50;
 
+    console.log(gameScreenWidth)
+
     // https://developer.mozilla.org/en-US/docs/Web/CSS/translate
     // Default x, y values - centers sprite on screen as start position
     let playerPositionX = gameScreenWidth / 2;
     let playerPositionY = gameScreenHeight / 2;
 
     const playerSpeed = 3; // Sprite movement speed
+    const grandmaSpeedModeOne = (gameScreenWidth > 600) ? playerSpeed*.3 : playerSpeed*.2;
+    const grandmaSpeedModeTwo = (gameScreenWidth > 600) ? playerSpeed*.5 : playerSpeed*.4;
 
     let foodEatenCount = -1;
     let gameTimer = 0;
 
     let playerDirection; // Direction status: "UP", "RIGHT", etc or "STOP"
-    let prevPlayerDirection = "STOP";
 
     let foodSpawnCount = 0;
 
@@ -155,7 +158,6 @@ function game() {
                         playerPositionY -= playerSpeed;
                         foodManPlayer.style.translate = `${playerPositionX}px ${playerPositionY}px`;
                         foodManPlayer.style.rotate = "-90deg";
-                        prevPlayerDirection = playerDirection;
                     }
                     break;
                 case "LEFT":
@@ -163,7 +165,6 @@ function game() {
                         playerPositionX -= playerSpeed;
                         foodManPlayer.style.translate = `${playerPositionX}px ${playerPositionY}px`;
                         foodManPlayer.style.transform = "rotateY(180deg)";
-                        prevPlayerDirection = playerDirection;
                     }
                     break;
                 case "DOWN":
@@ -171,7 +172,6 @@ function game() {
                         playerPositionY += playerSpeed;
                         foodManPlayer.style.translate = `${playerPositionX}px ${playerPositionY}px`;
                         foodManPlayer.style.rotate = "90deg";
-                        prevPlayerDirection = playerDirection;
                     }
                     break;
                 case "RIGHT":
@@ -179,11 +179,9 @@ function game() {
                         playerPositionX += playerSpeed;
                         foodManPlayer.style.translate = `${playerPositionX}px ${playerPositionY}px`;
                         foodManPlayer.style.rotate = "0deg";
-                        prevPlayerDirection = playerDirection;
                     }
                     break;
                 case "STOP":
-                    prevPlayerDirection = playerDirection;
                     // do nothing
                     break;
             }
@@ -221,27 +219,22 @@ function game() {
 
         const foods = [burger, donut, drink, fries, hotdog, icecream, pizza];
 
-        spawnGeneratedFood(); // Spawn first food
-
         // Spawn food every 2-6 second(s) throughout the game
-        const foodSpawnInterval = setInterval(() => {
-            if (foodSpawnCount < 11) { // Foods spawn is capped at 10 to prevent infinite spawning, I had 50+ at some point.
-                spawnGeneratedFood();
+        setInterval(() => {
+            if (foodSpawnCount < 11) { // Foods spawn is capped at 10 to prevent infinite spawning, I had 50+ at some point
+                const foodPosition = [Math.floor(Math.random() * gameScreenWidth), Math.floor(Math.random() * gameScreenHeight)];
+                const food = document.createElement("div");
+                food.classList.add("food", "collision-object");
+
+                food.appendChild(foods[Math.ceil(Math.random() * 7) - 1]);
+
+                food.style.translate = `${foodPosition[0]}px ${foodPosition[1]}px`;
+                gameScreen.appendChild(food);
+
+                foodSpawnCount += 1;
             }
         }, (2000 * Math.ceil(Math.random() * 3)));
 
-        function spawnGeneratedFood() {
-            const foodPosition = [Math.floor(Math.random() * gameScreenWidth), Math.floor(Math.random() * gameScreenHeight)];
-            const food = document.createElement("div");
-            food.classList.add("food", "collision-object");
-
-            food.appendChild(foods[Math.ceil(Math.random() * 6)]);
-
-            food.style.translate = `${foodPosition[0]}px ${foodPosition[1]}px`;
-            gameScreen.appendChild(food);
-
-            foodSpawnCount += 1;
-        }
     }
 
     function collisionDetection() {
@@ -403,7 +396,9 @@ function game() {
 
             let grandmaplayerPositionX = grandma.style.translate.replaceAll("px", "").split(" ").map((x) => parseInt(x))[0];
             let grandmaplayerPositionY = grandma.style.translate.replaceAll("px", "").split(" ").map((x) => parseInt(x))[1];
-            let grandmaplayerSpeed = playerSpeed * .3; // Half of food man's playerSpeed because she's a grandma right?
+            let grandmaplayerSpeed = grandmaSpeedModeOne; // Half of food man's playerSpeed because she's a grandma right?
+
+            console.log(gameScreenWidth)
 
             function grandmaChaseAnimation() {
                 // Recalculate food man's position and have grandma chase accordingly
@@ -433,11 +428,11 @@ function game() {
                 if (grandma.children[0].src === grandmaChasing.src) {
                     grandma.replaceChildren();
                     grandma.appendChild(grandmaAngry);
-                    grandmaplayerSpeed = playerSpeed * .6;
+                    grandmaplayerSpeed = grandmaSpeedModeTwo;
                 } else {
                     grandma.replaceChildren();
                     grandma.appendChild(grandmaChasing);
-                    grandmaplayerSpeed = playerSpeed * .3;
+                    grandmaplayerSpeed = grandmaSpeedModeOne;
                 }
             }, 5000);
         }
