@@ -9,16 +9,14 @@ function game() {
     let gameScreenWidth = gameScreen.offsetWidth - 50;
     let gameScreenHeight = gameScreen.offsetHeight - 50;
 
-    console.log(gameScreenWidth)
-
     // https://developer.mozilla.org/en-US/docs/Web/CSS/translate
     // Default x, y values - centers sprite on screen as start position
     let playerPositionX = gameScreenWidth / 2;
     let playerPositionY = gameScreenHeight / 2;
 
     const playerSpeed = 3; // Sprite movement speed
-    const grandmaSpeedModeOne = (gameScreenWidth > 600) ? playerSpeed*.3 : playerSpeed*.2;
-    const grandmaSpeedModeTwo = (gameScreenWidth > 600) ? playerSpeed*.5 : playerSpeed*.4;
+    const grandmaSpeedModeOne = (gameScreenWidth > 600) ? playerSpeed * .3 : playerSpeed * .2;
+    const grandmaSpeedModeTwo = (gameScreenWidth > 600) ? playerSpeed * .5 : playerSpeed * .4;
 
     let foodEatenCount = -1;
     let gameTimer = 0;
@@ -201,32 +199,33 @@ function game() {
     }
 
     function foodSpawner() {
-        const burger = new Image();
-        const donut = new Image();
-        const drink = new Image();
-        const fries = new Image();
-        const hotdog = new Image();
-        const icecream = new Image();
-        const pizza = new Image();
-
-        burger.src = `/assets/sprites/food/burger.png`;
-        donut.src = `/assets/sprites/food/donut.png`;
-        drink.src = `/assets/sprites/food/drink.png`;
-        fries.src = `/assets/sprites/food/fries.png`;
-        hotdog.src = `/assets/sprites/food/hotdog.png`;
-        icecream.src = `/assets/sprites/food/icecream.png`;
-        pizza.src = `/assets/sprites/food/pizza.png`;
-
-        const foods = [burger, donut, drink, fries, hotdog, icecream, pizza];
-
         // Spawn food every 2-6 second(s) throughout the game
+            const burger = new Image();
+            const donut = new Image();
+            const drink = new Image();
+            const fries = new Image();
+            const hotdog = new Image();
+            const icecream = new Image();
+            const pizza = new Image();
+
+            burger.src = `/assets/sprites/food/burger.png`;
+            donut.src = `/assets/sprites/food/donut.png`;
+            drink.src = `/assets/sprites/food/drink.png`;
+            fries.src = `/assets/sprites/food/fries.png`;
+            hotdog.src = `/assets/sprites/food/hotdog.png`;
+            icecream.src = `/assets/sprites/food/icecream.png`;
+            pizza.src = `/assets/sprites/food/pizza.png`;
+
+            const foods = [burger, donut, drink, fries, hotdog, icecream, pizza];
+
         setInterval(() => {
             if (foodSpawnCount < 11) { // Foods spawn is capped at 10 to prevent infinite spawning, I had 50+ at some point
-                const foodPosition = [Math.floor(Math.random() * gameScreenWidth), Math.floor(Math.random() * gameScreenHeight)];
                 const food = document.createElement("div");
                 food.classList.add("food", "collision-object");
 
                 food.appendChild(foods[Math.ceil(Math.random() * 7) - 1]);
+
+                const foodPosition = [Math.floor(Math.random() * gameScreenWidth), Math.floor(Math.random() * gameScreenHeight)];
 
                 food.style.translate = `${foodPosition[0]}px ${foodPosition[1]}px`;
                 gameScreen.appendChild(food);
@@ -397,8 +396,6 @@ function game() {
             let grandmaplayerPositionX = grandma.style.translate.replaceAll("px", "").split(" ").map((x) => parseInt(x))[0];
             let grandmaplayerPositionY = grandma.style.translate.replaceAll("px", "").split(" ").map((x) => parseInt(x))[1];
             let grandmaplayerSpeed = grandmaSpeedModeOne; // Half of food man's playerSpeed because she's a grandma right?
-
-            console.log(gameScreenWidth)
 
             function grandmaChaseAnimation() {
                 // Recalculate food man's position and have grandma chase accordingly
